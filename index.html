@@ -1,77 +1,91 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MAKE 10 TETRIS</title>
 <style>
 *{box-sizing:border-box}
 :root{color-scheme:dark}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
 body{
-  margin:0;min-height:100vh;background:#10131e;color:#f4f6ff;
+  background:#10131e;color:#f4f6ff;
   font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
-  display:flex;justify-content:center;padding:20px 12px;
+  display:flex;justify-content:center;align-items:center;
 }
-button{font:inherit;cursor:pointer}
-button:focus-visible{outline:3px solid #fff;outline-offset:3px}
-.app{width:min(760px,100%)}
-header{text-align:center;margin-bottom:18px}
-h1{font-size:clamp(24px,5vw,36px);letter-spacing:2px;margin:0}
-.subtitle{color:#9da8c7;font-size:13px;margin-top:5px}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-.stat{background:#1b2031;border:1px solid #303951;border-radius:12px;padding:10px;text-align:center}
-.stat span{display:block;color:#9da8c7;font-size:11px;margin-bottom:4px}
-.stat strong{font-size:clamp(17px,4vw,24px);font-variant-numeric:tabular-nums}
-.layout{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:14px;align-items:start}
-.board-wrap{position:relative;background:#0b0e17;border:2px solid #303951;border-radius:12px;padding:6px;overflow:hidden}
-#board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+button{font:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:2px solid white;outline-offset:2px}
+.app{
+  width:min(760px,100%);
+  height:100dvh;max-height:100dvh;
+  padding:clamp(5px,1.2vh,12px);
+  display:flex;flex-direction:column;gap:clamp(4px,0.8vh,9px);
+  overflow:hidden;
+}
+header{text-align:center;flex-shrink:0}
+h1{font-size:clamp(19px,3.5vh,32px);letter-spacing:2px;margin:0}
+.subtitle{color:#9da8c7;font-size:clamp(9px,1.5vh,12px)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;flex-shrink:0}
+.stat{background:#1b2031;border:1px solid #303951;border-radius:9px;padding:4px;text-align:center}
+.stat span{display:block;color:#9da8c7;font-size:clamp(8px,1.3vh,11px)}
+.stat strong{font-size:clamp(14px,2.5vh,22px);font-variant-numeric:tabular-nums}
+.layout{
+  display:grid;grid-template-columns:minmax(0,1fr) clamp(100px,22%,150px);
+  gap:clamp(5px,1.3vw,12px);flex:1;min-height:0;overflow:hidden;
+}
+.game-area{min-width:0;min-height:0;display:flex;flex-direction:column;gap:5px}
+.board-wrap{
+  flex:1;min-height:0;display:flex;justify-content:center;align-items:center;
+  background:#0b0e17;border:2px solid #303951;border-radius:10px;padding:4px;
+  overflow:hidden;
+}
+#board{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  grid-template-rows:repeat(10,minmax(0,1fr));
+  gap:clamp(2px,0.45vh,4px);
+  width:min(100%,calc((100dvh - 150px)*0.4));
+  height:100%;max-height:100%;
+}
 .cell{
-  aspect-ratio:1;min-width:0;display:flex;align-items:center;justify-content:center;
-  border-radius:6px;background:#1b2031;border:1px solid #282f44;
-  font-size:clamp(14px,3.8vw,24px);font-weight:800;
-  font-variant-numeric:tabular-nums;transition:background .1s;
+  min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;
+  border-radius:4px;background:#1b2031;border:1px solid #282f44;
+  font-size:clamp(12px,2.7vh,23px);font-weight:800;
+  font-variant-numeric:tabular-nums;
 }
-.cell.filled{color:#10131e;border:none;box-shadow:inset 0 -3px #0002}
-.cell.active{outline:2px solid #fff;outline-offset:-3px;z-index:1}
-.cell.clear{animation:pop .22s ease-in-out}
-@keyframes pop{50%{transform:scale(.65);opacity:.35}}
-.side{display:flex;flex-direction:column;gap:12px}
-.panel{background:#1b2031;border:1px solid #303951;border-radius:12px;padding:12px}
-.panel h2{font-size:12px;color:#9da8c7;letter-spacing:1px;margin:0 0 10px}
-.mini-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}
-.mini-cell{aspect-ratio:1;border-radius:4px;background:#0f1320;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
-.next-item{margin-bottom:9px}
+.cell.filled{color:#10131e;border:none;box-shadow:inset 0 -2px #0002}
+.cell.active{outline:2px solid #fff;outline-offset:-3px}
+.side{min-height:0;display:flex;flex-direction:column;gap:clamp(4px,0.8vh,8px);overflow:hidden}
+.panel{background:#1b2031;border:1px solid #303951;border-radius:9px;padding:clamp(5px,1vh,10px);flex-shrink:0}
+.panel h2{font-size:clamp(9px,1.4vh,12px);color:#9da8c7;letter-spacing:1px;margin:0 0 5px}
+.mini-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
+.mini-cell{aspect-ratio:1;min-width:0;border-radius:3px;background:#0f1320;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:clamp(9px,1.8vh,14px)}
+#holdStatus{font-size:clamp(7px,1.1vh,10px);color:#9da8c7;margin-top:4px}
+.next-item{margin-bottom:5px}
 .next-item:last-child{margin-bottom:0}
-.next-label{font-size:11px;color:#9da8c7;margin-bottom:4px}
-#holdStatus{font-size:12px;color:#9da8c7}
-.controls{display:flex;flex-direction:column;gap:7px}
-.btn{border:1px solid #3a4560;background:#252d43;color:#f4f6ff;padding:10px;border-radius:9px;font-weight:700}
+.next-label{font-size:clamp(8px,1.2vh,10px);color:#9da8c7;margin-bottom:3px}
+.controls{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+.btn{border:1px solid #3a4560;background:#252d43;color:#f4f6ff;padding:clamp(5px,0.9vh,9px) 4px;border-radius:7px;font-size:clamp(10px,1.5vh,13px);font-weight:700}
 .btn:hover{background:#343f5b}
-.btn.primary{background:#7964f4;border-color:#7964f4;color:white}
-.btn.primary:hover{background:#9180ff}
-.btn:disabled{opacity:.4;cursor:not-allowed}
-.help{font-size:12px;line-height:1.8;color:#aab4ce}
+.btn.primary{background:#7964f4;border-color:#7964f4}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.help{font-size:clamp(8px,1.25vh,11px);line-height:1.55;color:#aab4ce;overflow:hidden}
 .help strong{color:#f4f6ff}
-.mobile-controls{display:none;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:12px}
-.mobile-controls button{font-size:20px;padding:12px 0}
-#message{margin-top:12px;min-height:44px;background:#1b2031;border:1px solid #303951;border-radius:10px;padding:12px;text-align:center;font-size:13px;color:#c9d1e9}
+#message{flex-shrink:0;min-height:0;background:#1b2031;border:1px solid #303951;border-radius:7px;padding:6px;text-align:center;font-size:clamp(9px,1.4vh,12px);color:#c9d1e9}
 #message.good{color:#74f0b0}
 #message.bad{color:#ff9ca7}
-.footer{color:#7e89a8;font-size:11px;text-align:center;margin-top:12px}
+.footer{font-size:clamp(8px,1.2vh,10px);color:#7e89a8;text-align:center;flex-shrink:0}
+.mobile-controls{display:none;grid-template-columns:repeat(4,1fr);gap:4px;flex-shrink:0}
+.mobile-controls button{padding:5px 0}
 @media(max-width:520px){
- body{padding:12px 8px}
- .layout{grid-template-columns:minmax(0,1fr) 108px;gap:8px}
- .panel{padding:8px}
- .cell{font-size:clamp(14px,5vw,22px)}
- .mini-cell{font-size:10px}
- .mobile-controls{display:grid}
- .controls .btn{padding:8px 3px;font-size:12px}
- .help{font-size:11px}
+ .layout{grid-template-columns:minmax(0,1fr) clamp(90px,25%,115px)}
+ .help{line-height:1.4}
 }
-@media(max-width:360px){
- .layout{grid-template-columns:minmax(0,1fr) 94px}
- #board{gap:3px}
- .board-wrap{padding:4px}
+@media(max-height:520px){
+ .subtitle{display:none}
+ .app{gap:3px}
+ .panel{padding:4px}
+ .help{font-size:8px}
 }
 </style>
 </head>
@@ -89,15 +103,15 @@ h1{font-size:clamp(24px,5vw,36px);letter-spacing:2px;margin:0}
   </div>
 
   <div class="layout">
-    <div>
+    <div class="game-area">
       <div class="board-wrap">
         <div id="board" aria-label="4列10行のゲーム盤"></div>
       </div>
       <div class="mobile-controls">
-        <button class="btn" id="leftBtn" aria-label="左">←</button>
-        <button class="btn" id="rightBtn" aria-label="右">→</button>
-        <button class="btn" id="rotateBtn" aria-label="回転">↻</button>
-        <button class="btn" id="downBtn" aria-label="高速落下">↓</button>
+        <button class="btn" id="leftBtn">←</button>
+        <button class="btn" id="rightBtn">→</button>
+        <button class="btn" id="downBtn">↓</button>
+        <button class="btn" id="dropBtn">DROP</button>
       </div>
       <div id="message">スタートを押してゲーム開始！</div>
     </div>
@@ -114,158 +128,108 @@ h1{font-size:clamp(24px,5vw,36px);letter-spacing:2px;margin:0}
       </div>
       <div class="controls">
         <button class="btn primary" id="startBtn">ゲーム開始</button>
-        <button class="btn" id="holdBtn">ホールド [C]</button>
+        <button class="btn" id="holdBtn">HOLD [C]</button>
         <button class="btn" id="pauseBtn" disabled>一時停止 [P]</button>
         <button class="btn" id="restartBtn">リスタート</button>
       </div>
       <div class="panel help">
         <h2>RULES</h2>
-        <strong>10を作れ！</strong><br>
-        縦・横に隣接する数字の和が10になると消える。<br><br>
-        <strong>連鎖ボーナス</strong><br>
-        連続消去で獲得点アップ！<br><br>
-        <strong>GAME OVER</strong><br>
-        いずれかの列が10マス埋まると終了。
+        <strong>合計10で消去！</strong><br>
+        縦・横の連続した数字の合計が10なら消える。<br>
+        <br><strong>連鎖ボーナス</strong><br>
+        連続消去で得点アップ！<br>
+        <br><strong>GAME OVER</strong><br>
+        どれかの列が10マス埋まると終了。
       </div>
     </aside>
   </div>
-  <div class="footer">← → 移動 / ↑ 回転 / ↓ 高速落下 / SPACE 一気に落下 / C HOLD / P 一時停止</div>
+  <div class="footer">← → 移動 / ↓ 高速落下 / SPACE 一気に落下 / C HOLD / P 一時停止</div>
 </div>
 
 <script>
 "use strict";
 
-const W = 4, H = 10;
-const COLORS = {
-  1:"#8de4ff", 2:"#78c6ff", 3:"#8c9bff",
-  4:"#bd91ff", 5:"#ed91ff", 6:"#ff91c7",
-  7:"#ffab91", 8:"#ffd166", 9:"#a9e66e"
+const W=4,H=10;
+const COLORS={
+  1:"#8de4ff",2:"#78c6ff",3:"#8c9bff",
+  4:"#bd91ff",5:"#ed91ff",6:"#ff91c7",
+  7:"#ffab91",8:"#ffd166",9:"#a9e66e"
 };
 
-const $ = id => document.getElementById(id);
-const boardEl = $("board");
-const holdGrid = $("holdGrid");
-const nextList = $("nextList");
+const $=id=>document.getElementById(id);
+const boardEl=$("board");
+const holdGrid=$("holdGrid");
+const nextList=$("nextList");
 
-let board, current, queue, hold, holdUsed;
-let score, level, bestChain, elapsed, chainCount;
-let running = false, paused = false, gameOver = false;
-let lastTime = 0, dropCounter = 0, rafId = 0;
-let clearCells = new Set();
-let clearUntil = 0;
-let messageTimer = null;
-let pieceSerial = 0;
+let board,current,queue,hold,holdUsed;
+let score,level,bestChain,elapsed,chainCount;
+let running=false,paused=false,gameOver=false;
+let lastTime=0,dropCounter=0,rafId=0;
 
-function randomPiece(){
-  return {
-    id: ++pieceSerial,
-    value: 1 + Math.floor(Math.random()*9),
-    x: 1,
-    y: 0
-  };
+const cells=[];
+for(let y=0;y<H;y++){
+  cells[y]=[];
+  for(let x=0;x<W;x++){
+    const el=document.createElement("div");
+    el.className="cell";
+    boardEl.appendChild(el);
+    cells[y][x]=el;
+  }
 }
 
+function randomPiece(){
+  return {value:1+Math.floor(Math.random()*9),x:1,y:0};
+}
 function makeEmptyBoard(){
   return Array.from({length:H},()=>Array(W).fill(0));
 }
-
-function makeCell(){
-  const d = document.createElement("div");
-  d.className = "cell";
-  boardEl.appendChild(d);
-  return d;
+function setMessage(text,type=""){
+  $("message").textContent=text;
+  $("message").className=type;
 }
-
-const cells = [];
-for(let y=0;y<H;y++){
-  cells[y]=[];
-  for(let x=0;x<W;x++) cells[y][x]=makeCell();
-}
-
 function init(){
   cancelAnimationFrame(rafId);
   board=makeEmptyBoard();
   current=null;
   queue=[randomPiece(),randomPiece(),randomPiece()];
-  hold=null;
-  holdUsed=false;
-  score=0;
-  level=1;
-  bestChain=0;
-  elapsed=0;
-  chainCount=0;
-  running=false;
-  paused=false;
-  gameOver=false;
-  dropCounter=0;
-  lastTime=0;
-  clearCells.clear();
-  clearUntil=0;
+  hold=null;holdUsed=false;
+  score=0;level=1;bestChain=0;elapsed=0;chainCount=0;
+  running=false;paused=false;gameOver=false;
+  lastTime=0;dropCounter=0;
   $("startBtn").disabled=false;
+  $("startBtn").textContent="ゲーム開始";
   $("pauseBtn").disabled=true;
   $("pauseBtn").textContent="一時停止 [P]";
-  $("startBtn").textContent="ゲーム開始";
   setMessage("スタートを押してゲーム開始！");
   render();
 }
-
-function setMessage(text,type=""){
-  const el=$("message");
-  el.textContent=text;
-  el.className=type;
-}
-
 function ensureQueue(){
-  while(queue.length<3) queue.push(randomPiece());
+  while(queue.length<3)queue.push(randomPiece());
 }
-
+function valid(x,y,value){
+  return x>=0&&x<W&&y>=0&&y<H&&board[y][x]===0;
+}
 function spawnPiece(){
   ensureQueue();
   current=queue.shift();
   ensureQueue();
-  current.x=1;
-  current.y=0;
+  current.x=1;current.y=0;
   holdUsed=false;
   if(!valid(current.x,current.y,current.value)){
-    endGame();
-    return;
+    endGame();return;
   }
   render();
 }
-
-function valid(x,y,value){
-  if(x<0 || x>=W || y<0 || y>=H) return false;
-  return board[y][x]===0;
-}
-
 function move(dx,dy){
-  if(!running || paused || gameOver || !current) return false;
-  const nx=current.x+dx, ny=current.y+dy;
-  if(valid(nx,ny,current.value)){
-    current.x=nx;
-    current.y=ny;
-    render();
-    return true;
+  if(!running||paused||gameOver||!current)return false;
+  if(valid(current.x+dx,current.y+dy,current.value)){
+    current.x+=dx;current.y+=dy;
+    render();return true;
   }
   return false;
 }
-
-function rotatePiece(){
-  if(!running || paused || gameOver || !current) return;
-  // 数字ブロックなので回転は横移動と同じく位置を変えない。
-  // 回転キーは、左右どちらかへ移動可能な場合に方向転換する。
-  const candidates=[-1,1];
-  for(const dx of candidates){
-    if(valid(current.x+dx,current.y,current.value)){
-      current.x+=dx;
-      render();
-      return;
-    }
-  }
-}
-
 function holdPiece(){
-  if(!running || paused || gameOver || !current || holdUsed) return;
+  if(!running||paused||gameOver||!current||holdUsed)return;
   const old=hold;
   hold=current.value;
   holdUsed=true;
@@ -274,47 +238,65 @@ function holdPiece(){
     holdUsed=true;
   }else{
     current.value=old;
-    current.x=1;
-    current.y=0;
+    current.x=1;current.y=0;
     if(!valid(current.x,current.y,current.value)){
-      endGame();
-      return;
+      endGame();return;
     }
   }
   setMessage("ホールド！");
   render();
 }
-
 function lockPiece(){
-  if(!current || gameOver) return;
+  if(!current||gameOver)return;
   const {x,y,value}=current;
-  if(y<0 || board[y][x]!==0){
-    endGame();
-    return;
+  if(!valid(x,y,value)){
+    endGame();return;
   }
   board[y][x]=value;
   current=null;
   chainCount=0;
   resolveClears();
-  if(!gameOver) spawnPiece();
+  if(!gameOver)spawnPiece();
 }
 
+/*
+  すべての縦横の連続区間を調べる。
+  合計が10になった区間を消去対象にする。
+  1つの列・行に複数の区間がある場合も検出する。
+*/
 function findMatches(){
-  const found=[];
-  for(let y=0;y<H;y++){
-    for(let x=0;x<W;x++){
-      if(board[y][x]===0) continue;
-      if(x+1<W && board[y][x+1]!==0 && board[y][x]+board[y][x+1]===10){
-        found.push([y,x],[y,x+1]);
-      }
-      if(y+1<H && board[y+1][x]!==0 && board[y][x]+board[y+1][x]===10){
-        found.push([y,x],[y+1,x]);
+  const found=new Set();
+
+  function scanLine(coords){
+    for(let start=0;start<coords.length;start++){
+      let sum=0;
+      for(let end=start;end<coords.length;end++){
+        const [y,x]=coords[end];
+        const v=board[y][x];
+        if(v===0)break;
+        sum+=v;
+        if(sum>10)break;
+        if(sum===10){
+          for(let i=start;i<=end;i++){
+            found.add(coords[i].join(","));
+          }
+          // 数字は正なので、延長して10になることはない
+          break;
+        }
       }
     }
   }
-  const unique=new Map();
-  for(const [y,x] of found) unique.set(`${y},${x}`,[y,x]);
-  return [...unique.values()];
+
+  // 横方向
+  for(let y=0;y<H;y++){
+    scanLine(Array.from({length:W},(_,x)=>[y,x]));
+  }
+  // 縦方向
+  for(let x=0;x<W;x++){
+    scanLine(Array.from({length:H},(_,y)=>[y,x]));
+  }
+
+  return [...found].map(k=>k.split(",").map(Number));
 }
 
 function compactBoard(){
@@ -323,108 +305,89 @@ function compactBoard(){
     for(let y=H-1;y>=0;y--){
       if(board[y][x]!==0){
         board[write][x]=board[y][x];
-        if(write!==y) board[y][x]=0;
+        if(write!==y)board[y][x]=0;
         write--;
       }
     }
-    for(let y=write;y>=0;y--) board[y][x]=0;
+    for(let y=write;y>=0;y--)board[y][x]=0;
   }
 }
 
 function resolveClears(){
-  const matches=findMatches();
-  if(matches.length===0){
-    chainCount=0;
-    return;
-  }
+  let totalCleared=0;
+  chainCount=0;
 
-  chainCount++;
-  bestChain=Math.max(bestChain,chainCount);
+  // 消去→落下→再判定を繰り返して連鎖を処理
+  while(chainCount<40){
+    const matches=findMatches();
+    if(matches.length===0)break;
 
-  const count=matches.length;
-  const bonus=chainCount;
-  score+=count*100*bonus;
-  matches.forEach(([y,x])=>board[y][x]=0);
-  compactBoard();
-
-  render();
-  setMessage(
-    `${chainCount}連鎖！ ${count}マス消去！ +${count*100*bonus}点`,
-    "good"
-  );
-
-  // 盤面を安定させるため、連鎖を同一ターン内で解決する
-  let guard=0;
-  while(guard++<H*W){
-    const next=findMatches();
-    if(next.length===0) break;
     chainCount++;
     bestChain=Math.max(bestChain,chainCount);
-    score+=next.length*100*chainCount;
-    for(const [y,x] of next) board[y][x]=0;
+
+    const unique=new Set(matches.map(([y,x])=>`${y},${x}`));
+    const count=unique.size;
+    totalCleared+=count;
+
+    // 連鎖倍率：1連鎖×1、2連鎖×2、3連鎖×3……
+    score+=count*100*chainCount;
+
+    for(const key of unique){
+      const [y,x]=key.split(",").map(Number);
+      board[y][x]=0;
+    }
     compactBoard();
   }
 
-  if(chainCount>1){
-    setMessage(`${chainCount}連鎖達成！ スコア +${score.toLocaleString()}点`, "good");
+  if(totalCleared>0){
+    setMessage(
+      `${chainCount}連鎖！ ${totalCleared}マス消去！ +${score.toLocaleString()}点`,
+      "good"
+    );
   }
   updateStats();
 }
 
 function hardDrop(){
-  if(!running || paused || gameOver || !current) return;
+  if(!running||paused||gameOver||!current)return;
   let distance=0;
   while(valid(current.x,current.y+1,current.value)){
-    current.y++;
-    distance++;
+    current.y++;distance++;
   }
   score+=distance*2;
   lockPiece();
   updateStats();
 }
 
-function stepDrop(){
-  if(!current || !running || paused || gameOver) return;
-  if(!move(0,1)) lockPiece();
-}
-
 function endGame(){
-  gameOver=true;
-  running=false;
-  paused=false;
-  current=null;
+  gameOver=true;running=false;paused=false;current=null;
   $("pauseBtn").disabled=true;
   $("startBtn").disabled=false;
   $("startBtn").textContent="もう一度プレイ";
-  setMessage(`GAME OVER — スコア ${score.toLocaleString()}点`, "bad");
+  setMessage(`GAME OVER — スコア ${score.toLocaleString()}点`,"bad");
   render();
 }
 
 function startGame(){
-  if(gameOver){
-    init();
-  }
-  if(running && !paused) return;
-  running=true;
-  paused=false;
+  if(gameOver)init();
+  if(running&&!paused)return;
+  running=true;paused=false;
   $("startBtn").disabled=true;
   $("pauseBtn").disabled=false;
   $("pauseBtn").textContent="一時停止 [P]";
-  if(!current) spawnPiece();
-  lastTime=performance.now();
-  dropCounter=0;
+  if(!current)spawnPiece();
+  lastTime=performance.now();dropCounter=0;
   cancelAnimationFrame(rafId);
   rafId=requestAnimationFrame(loop);
-  setMessage("ゲーム開始！ 10を作って連鎖を狙おう。");
+  setMessage("ゲーム開始！ 連続する数字で10を作ろう。");
 }
 
 function togglePause(){
-  if(!running || gameOver) return;
+  if(!running||gameOver)return;
   paused=!paused;
   $("pauseBtn").textContent=paused?"再開 [P]":"一時停止 [P]";
-  if(paused){
-    setMessage("一時停止中");
-  }else{
+  if(paused)setMessage("一時停止中");
+  else{
     lastTime=performance.now();
     setMessage("ゲーム再開！");
     rafId=requestAnimationFrame(loop);
@@ -432,7 +395,7 @@ function togglePause(){
 }
 
 function loop(now){
-  if(!running || paused || gameOver) return;
+  if(!running||paused||gameOver)return;
   const dt=Math.min(now-lastTime,100);
   lastTime=now;
   elapsed+=dt;
@@ -441,11 +404,11 @@ function loop(now){
   dropCounter+=dt;
   if(dropCounter>=interval){
     dropCounter=0;
-    stepDrop();
+    if(!move(0,1))lockPiece();
   }
   updateStats();
   render();
-  if(running && !paused && !gameOver) rafId=requestAnimationFrame(loop);
+  if(running&&!paused&&!gameOver)rafId=requestAnimationFrame(loop);
 }
 
 function updateStats(){
@@ -459,12 +422,10 @@ function renderMini(container,value){
   for(let i=0;i<4;i++){
     const d=document.createElement("div");
     d.className="mini-cell";
-    if(value!==null && i===1){
+    if(value!==null&&i===1){
       d.textContent=value;
       d.style.background=COLORS[value];
       d.style.color="#10131e";
-    }else{
-      d.textContent="";
     }
     container.appendChild(d);
   }
@@ -499,20 +460,19 @@ function renderSide(){
 }
 
 function render(){
-  if(!board) return;
-  const active=current && !gameOver ? `${current.y},${current.x}`:null;
+  if(!board)return;
   for(let y=0;y<H;y++){
     for(let x=0;x<W;x++){
       const el=cells[y][x];
       let v=board[y][x];
-      const isActive=active===`${y},${x}`;
-      if(isActive) v=current.value;
+      const active=current&&!gameOver&&current.x===x&&current.y===y;
+      if(active)v=current.value;
       el.textContent=v||"";
       el.className="cell";
       el.style.background=v?COLORS[v]:"#1b2031";
       el.style.color=v?"#10131e":"";
-      if(v) el.classList.add("filled");
-      if(isActive) el.classList.add("active");
+      if(v)el.classList.add("filled");
+      if(active)el.classList.add("active");
     }
   }
   updateStats();
@@ -521,41 +481,31 @@ function render(){
 
 $("startBtn").addEventListener("click",startGame);
 $("restartBtn").addEventListener("click",()=>{
-  init();
-  startGame();
+  init();startGame();
 });
 $("pauseBtn").addEventListener("click",togglePause);
 $("holdBtn").addEventListener("click",holdPiece);
 $("leftBtn").addEventListener("click",()=>move(-1,0));
 $("rightBtn").addEventListener("click",()=>move(1,0));
 $("downBtn").addEventListener("click",()=>{
-  if(move(0,1)){
-    score+=1;
-    updateStats();
-  }else if(running && !paused && !gameOver){
-    lockPiece();
-  }
+  if(move(0,1)){score++;updateStats();}
+  else if(running&&!paused&&!gameOver)lockPiece();
 });
-$("rotateBtn").addEventListener("click",rotatePiece);
+$("dropBtn").addEventListener("click",hardDrop);
 
 document.addEventListener("keydown",e=>{
-  if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"," "].includes(e.key)){
-    e.preventDefault();
-  }
-  if(e.repeat && ["c","C","p","P","ArrowUp"," "].includes(e.key)) return;
-  if(e.key==="Enter" && !running && !gameOver) startGame();
-  if(e.key==="ArrowLeft") move(-1,0);
-  if(e.key==="ArrowRight") move(1,0);
+  if(["ArrowLeft","ArrowRight","ArrowDown"," "].includes(e.key))e.preventDefault();
+  if(e.repeat&&["c","C","p","P"," "].includes(e.key))return;
+  if(e.key==="Enter"&&!running&&!gameOver)startGame();
+  if(e.key==="ArrowLeft")move(-1,0);
+  if(e.key==="ArrowRight")move(1,0);
   if(e.key==="ArrowDown"){
-    if(move(0,1)){
-      score+=1;
-      updateStats();
-    }else if(running && !paused && !gameOver) lockPiece();
+    if(move(0,1)){score++;updateStats();}
+    else if(running&&!paused&&!gameOver)lockPiece();
   }
-  if(e.key==="ArrowUp") rotatePiece();
-  if(e.key===" ") hardDrop();
-  if(e.key==="c" || e.key==="C") holdPiece();
-  if(e.key==="p" || e.key==="P") togglePause();
+  if(e.key===" ")hardDrop();
+  if(e.key==="c"||e.key==="C")holdPiece();
+  if(e.key==="p"||e.key==="P")togglePause();
 });
 
 init();
