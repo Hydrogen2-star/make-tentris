@@ -1,711 +1,955 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MAKE 10 TETRIS</title>
+<title>SUM 10 - CHAIN</title>
 <style>
-*{box-sizing:border-box}
-:root{color-scheme:dark}
-html,body{margin:0;width:100%;height:100%;overflow:hidden}
-body{
- background:#10131e;color:#f4f6ff;
- font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
- display:flex;justify-content:center;align-items:center;
+:root {
+  --bg: #101522;
+  --panel: #1a2233;
+  --line: #35425c;
+  --text: #f3f6ff;
+  --cyan: #50e7ff;
+  --gold: #ffd166;
 }
-button{font:inherit;cursor:pointer;touch-action:manipulation}
-button:focus-visible{outline:2px solid white;outline-offset:2px}
-.app{
- width:min(850px,100%);height:100dvh;max-height:100dvh;
- padding:clamp(4px,1vh,10px);
- display:flex;flex-direction:column;gap:clamp(3px,.65vh,7px);
- overflow:hidden;
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  height: 100dvh;
+  overflow: hidden;
+  color: var(--text);
+  background:
+    radial-gradient(ellipse at 50% 30%, #24314d 0%, var(--bg) 70%);
+  font-family: system-ui, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  user-select: none;
 }
-header{text-align:center;flex-shrink:0}
-h1{font-size:clamp(19px,3.3vh,30px);letter-spacing:2px;margin:0}
-.subtitle{color:#9da8c7;font-size:clamp(9px,1.4vh,12px)}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;flex-shrink:0}
-.stat{background:#1b2031;border:1px solid #303951;border-radius:8px;padding:3px;text-align:center}
-.stat span{display:block;color:#9da8c7;font-size:clamp(8px,1.2vh,11px)}
-.stat strong{font-size:clamp(14px,2.3vh,22px);font-variant-numeric:tabular-nums}
-.layout{
- display:grid;grid-template-columns:minmax(0,1fr) clamp(115px,24%,180px);
- gap:clamp(5px,1.2vw,12px);flex:1;min-height:0;overflow:hidden;
+header {
+  width: 100%;
+  text-align: center;
+  padding: 8px 0 4px;
+  flex-shrink: 0;
 }
-.game-area{min-width:0;min-height:0;display:flex;flex-direction:column;gap:4px}
-.board-wrap{
- position:relative;flex:1;min-height:0;display:flex;
- justify-content:center;align-items:center;
- background:#0b0e17;border:2px solid #303951;
- border-radius:9px;padding:4px;overflow:hidden;
+h1 {
+  font-size: clamp(18px, 4vw, 28px);
+  margin: 0;
+  letter-spacing: 3px;
+  color: var(--cyan);
+  text-shadow: 0 0 16px #50e7ff55;
 }
-#board{
- display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
- grid-template-rows:repeat(10,minmax(0,1fr));
- gap:clamp(2px,.4vh,4px);
- height:100%;max-height:100%;
- width:min(100%,calc((100dvh - 140px)*.4));
+.subtitle { font-size: 10px; color: #9eabc5; letter-spacing: 2px; }
+main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(7px, 2vw, 20px);
+  width: 100%;
+  padding: 5px;
 }
-.cell{
- min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;
- border-radius:4px;background:#1b2031;border:1px solid #282f44;
- font-size:clamp(12px,2.6vh,23px);font-weight:800;
+.side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: clamp(68px, 18vw, 125px);
+  flex-shrink: 0;
 }
-.cell.filled{color:#10131e;border:none;box-shadow:inset 0 -2px #0002}
-.cell.active{outline:2px solid white;outline-offset:-3px}
-.cell.bomb{background:#ff594f!important;color:white!important;font-size:clamp(15px,3vh,26px)}
-.combo-overlay{
- position:absolute;z-index:5;top:40%;left:0;width:100%;
- text-align:center;pointer-events:none;opacity:0;
- transform:scale(.5) rotate(-5deg);
- text-shadow:0 3px 0 #31236b,0 0 22px #9b7aff;
+.panel {
+  width: 100%;
+  padding: 8px 5px;
+  border: 1px solid var(--line);
+  background: #182033dd;
+  border-radius: 10px;
+  text-align: center;
 }
-.combo-overlay.show{animation:comboPop 1.1s ease-out forwards}
-.combo-main{
- font-size:clamp(30px,7vh,62px);font-weight:1000;
- color:#ffe66d;letter-spacing:2px;
- -webkit-text-stroke:1px #fff;
+.panel-title {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #a9b7d3;
+  margin-bottom: 5px;
 }
-.combo-sub{font-size:clamp(12px,2.5vh,20px);font-weight:900;color:white;margin-top:2px}
-@keyframes comboPop{
- 0%{opacity:0;transform:scale(.4) rotate(-8deg)}
- 15%{opacity:1;transform:scale(1.2) rotate(2deg)}
- 28%{transform:scale(1) rotate(0)}
- 72%{opacity:1;transform:scale(1)}
- 100%{opacity:0;transform:scale(1.3) translateY(-25px)}
+.score { font-size: clamp(17px, 4vw, 24px); font-weight: 800; }
+.small { font-size: 11px; color: #a9b7d3; }
+#board {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  gap: 3px;
+  height: min(68dvh, 650px);
+  width: min(42vw, 300px, calc(68dvh * .43));
+  aspect-ratio: 4 / 10;
+  padding: 4px;
+  flex-shrink: 0;
+  background: #080d18;
+  border: 2px solid #53627e;
+  border-radius: 9px;
+  box-shadow: 0 0 28px #0008, inset 0 0 20px #0008;
+  overflow: hidden;
 }
-.side{min-height:0;display:flex;flex-direction:column;gap:clamp(3px,.6vh,7px);overflow:hidden}
-.panel{background:#1b2031;border:1px solid #303951;border-radius:8px;padding:clamp(4px,.8vh,9px);flex-shrink:0}
-.panel h2{font-size:clamp(9px,1.35vh,12px);color:#9da8c7;letter-spacing:1px;margin:0 0 4px}
-.mini-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
-.mini-cell{aspect-ratio:1;min-width:0;border-radius:3px;background:#0f1320;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:clamp(9px,1.7vh,14px)}
-#holdStatus{font-size:clamp(7px,1vh,10px);color:#9da8c7;margin-top:3px}
-.next-item{margin-bottom:4px}
-.next-item:last-child{margin-bottom:0}
-.next-label{font-size:clamp(8px,1.15vh,10px);color:#9da8c7;margin-bottom:2px}
-.controls{display:flex;flex-direction:column;gap:3px;flex-shrink:0}
-.btn{border:1px solid #3a4560;background:#252d43;color:#f4f6ff;padding:clamp(4px,.7vh,8px) 3px;border-radius:6px;font-size:clamp(10px,1.4vh,13px);font-weight:700}
-.btn:hover{background:#343f5b}
-.btn.primary{background:#7964f4;border-color:#7964f4}
-.btn:disabled{opacity:.45;cursor:not-allowed}
-.help{font-size:clamp(8px,1.1vh,10px);line-height:1.45;color:#aab4ce}
-.help strong{color:#f4f6ff}
-.ranking{min-height:0;overflow:hidden}
-.rank-row{display:flex;justify-content:space-between;gap:3px;font-size:clamp(8px,1.15vh,11px);padding:2px 0;border-bottom:1px solid #303951}
-.rank-row:last-child{border-bottom:0}
-.rank-name{color:#aab4ce;white-space:nowrap}
-.rank-score{font-variant-numeric:tabular-nums;font-weight:700}
-#message{flex-shrink:0;background:#1b2031;border:1px solid #303951;border-radius:6px;padding:5px;text-align:center;font-size:clamp(9px,1.3vh,12px);color:#c9d1e9}
-#message.good{color:#74f0b0}
-#message.bad{color:#ff9ca7}
-.footer{font-size:clamp(8px,1.1vh,10px);color:#7e89a8;text-align:center;flex-shrink:0}
-.mobile-controls{display:none;grid-template-columns:repeat(4,1fr);gap:4px;flex-shrink:0}
-.mobile-controls button{padding:5px 0}
-@media(max-width:520px){
- .layout{grid-template-columns:minmax(0,1fr) clamp(98px,27%,125px)}
- .help{line-height:1.35}
+.cell {
+  min-width: 0;
+  min-height: 0;
+  border-radius: 4px;
+  background: #1b2538;
+  border: 1px solid #29364d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(12px, 3.5vw, 23px);
+  font-weight: 900;
+  position: relative;
 }
-@media(max-height:560px){
- .subtitle{display:none}
- .app{gap:3px}
- .panel{padding:3px}
- .help{font-size:8px}
- .rank-row{padding:1px 0}
+.n1 { background:#216a91; color:white; }
+.n2 { background:#287fba; color:white; }
+.n3 { background:#267fa0; color:white; }
+.n4 { background:#367b73; color:white; }
+.n5 { background:#588348; color:white; }
+.n6 { background:#9b9239; color:white; }
+.n7 { background:#b77932; color:white; }
+.n8 { background:#b45b48; color:white; }
+.n9 { background:#a94a6c; color:white; }
+.active {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  border: 2px solid #ffffffd9;
+  font-size: clamp(12px, 3.5vw, 23px);
+  font-weight: 950;
+  color: white;
+  box-shadow: 0 0 14px #ffffff55, inset 0 0 9px #ffffff25;
+  transition: top .045s linear, left .045s linear;
+  pointer-events: none;
+}
+.active.n1 { background:#216a91; }
+.active.n2 { background:#287fba; }
+.active.n3 { background:#267fa0; }
+.active.n4 { background:#367b73; }
+.active.n5 { background:#588348; }
+.active.n6 { background:#9b9239; }
+.active.n7 { background:#b77932; }
+.active.n8 { background:#b45b48; }
+.active.n9 { background:#a94a6c; }
+.gauge-shell {
+  width: 100%;
+  height: 180px;
+  border: 2px solid #3c4962;
+  background: #080d18;
+  border-radius: 8px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column-reverse;
+  overflow: hidden;
+}
+#gaugeFill {
+  width: 100%;
+  height: 0%;
+  background: linear-gradient(to top, #2786ff, #43eaff, #ffffff);
+  border-radius: 4px;
+  box-shadow: 0 0 15px #50e7ff88;
+  transition: height .25s ease;
+}
+.gauge-shell.ready {
+  border-color: #ffe37d;
+  box-shadow: 0 0 18px #ffd16699;
+  animation: readyPulse .7s infinite alternate;
+}
+.gauge-shell.ready #gaugeFill {
+  background: linear-gradient(to top, #ff8c32, #ffe66d, white);
+  box-shadow: 0 0 20px #ffd166;
+}
+@keyframes readyPulse {
+  from { box-shadow: 0 0 8px #ffd16666; }
+  to { box-shadow: 0 0 23px #ffd166dd; }
+}
+#chargeText { font-size: 12px; font-weight: 800; margin-top: 5px; }
+#readyText { font-size: 10px; color: #8492ac; min-height: 15px; }
+#readyText.ready { color: var(--gold); font-weight: 900; }
+#combo {
+  position: absolute;
+  z-index: 20;
+  top: 34%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(.3);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  font-size: clamp(26px, 7vw, 48px);
+  font-weight: 1000;
+  font-style: italic;
+  color: #ffe56f;
+  -webkit-text-stroke: 1px #ff842b;
+  text-shadow: 0 0 12px #ffad32, 0 4px 0 #9e421d;
+}
+#combo.show { animation: comboPop .85s ease-out forwards; }
+@keyframes comboPop {
+  0% { opacity:0; transform:translate(-50%,-50%) scale(.3) rotate(-9deg); }
+  20% { opacity:1; transform:translate(-50%,-50%) scale(1.2) rotate(3deg); }
+  38% { transform:translate(-50%,-50%) scale(1) rotate(0); }
+  75% { opacity:1; }
+  100% { opacity:0; transform:translate(-50%,-80%) scale(.9); }
+}
+#board.shake { animation: shake .28s linear; }
+@keyframes shake {
+  0%,100% { transform:translateX(0); }
+  20% { transform:translateX(-5px); }
+  40% { transform:translateX(5px); }
+  60% { transform:translateX(-3px); }
+  80% { transform:translateX(3px); }
+}
+.cell.clearing {
+  animation: clearCell .28s ease-out forwards;
+}
+@keyframes clearCell {
+  0% { opacity:1; transform:scale(1); filter:brightness(1); }
+  45% { opacity:1; transform:scale(1.13); filter:brightness(3); }
+  100% { opacity:0; transform:scale(.1); }
+}
+.cell.blast {
+  animation: blastCell .42s ease-out forwards;
+}
+@keyframes blastCell {
+  0% { filter:brightness(1); }
+  30% { filter:brightness(4) saturate(0); background:#fff; transform:scale(1.08); }
+  100% { filter:brightness(1.6); }
+}
+#explosionFX {
+  position:absolute;
+  inset:0;
+  z-index:10;
+  pointer-events:none;
+}
+.blast-ring {
+  position:absolute;
+  width:20px;
+  height:20px;
+  border:4px solid #fff6a1;
+  border-radius:50%;
+  box-shadow:0 0 20px #ff9d35, inset 0 0 12px #fff;
+  transform:translate(-50%,-50%) scale(.2);
+  animation:ring .48s ease-out forwards;
+}
+@keyframes ring {
+  to { transform:translate(-50%,-50%) scale(8); opacity:0; }
+}
+footer {
+  flex-shrink: 0;
+  width:100%;
+  padding: 4px 8px max(6px, env(safe-area-inset-bottom));
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+}
+.controls { display:flex; gap:7px; justify-content:center; width:100%; }
+button {
+  border:1px solid #465570;
+  border-radius:9px;
+  background:#202c42;
+  color:white;
+  font-size:13px;
+  font-weight:800;
+  padding:9px 12px;
+  min-width:50px;
+  cursor:pointer;
+  touch-action: manipulation;
+}
+button:active { transform:scale(.96); }
+button:disabled { opacity:.35; cursor:default; }
+#blastBtn {
+  min-width: 130px;
+  background:#242b3a;
+  color:#78849a;
+  border:2px solid #39445a;
+  font-size:15px;
+}
+#blastBtn.ready {
+  background:linear-gradient(135deg,#ff8b32,#ffd85d);
+  color:#301707;
+  border-color:#fff0a3;
+  box-shadow:0 0 20px #ffb13c99;
+  animation:readyPulse .7s infinite alternate;
+}
+#blastBtn.ready:active { background:#fff1a0; }
+#holdBtn { color:#80eaff; }
+#message { font-size:11px; color:#b5c3dd; min-height:14px; text-align:center; }
+#overlay {
+  position:fixed;
+  inset:0;
+  z-index:50;
+  background:#070b14eF;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+#overlay.hidden { display:none; }
+.modal {
+  width:min(330px,100%);
+  border:1px solid #4a5d7b;
+  border-radius:16px;
+  background:#182236;
+  padding:22px;
+  text-align:center;
+  box-shadow:0 15px 60px #0009;
+}
+.modal h2 { margin:0 0 10px; color:var(--cyan); }
+.modal p { font-size:13px; line-height:1.8; color:#c0cce0; }
+#rankList { text-align:left; padding-left:24px; font-size:13px; line-height:1.9; }
+@media (max-height:600px) {
+  header { padding:3px 0; }
+  .subtitle { display:none; }
+  #board { height:65dvh; width:min(38vw, calc(65dvh * .43)); }
+  .gauge-shell { height:120px; }
+  .side { gap:5px; }
+  .panel { padding:5px 3px; }
+  footer { gap:3px; padding-top:2px; }
+  button { padding:7px 9px; }
 }
 </style>
 </head>
 <body>
-<div class="app">
- <header>
-  <h1>MAKE 10 <span style="color:#8c7bff">TETRIS</span></h1>
-  <div class="subtitle">積んで、つないで、10を作れ。</div>
- </header>
+<header>
+  <h1>SUM 10 <span style="color:#fff">CHAIN</span></h1>
+  <div class="subtitle">CONNECT · CLEAR · CHAIN · EXPLODE</div>
+</header>
 
- <div class="stats">
-  <div class="stat"><span>SCORE</span><strong id="score">0</strong></div>
-  <div class="stat"><span>CHAIN BEST</span><strong id="bestChain">0</strong></div>
-  <div class="stat"><span>LEVEL</span><strong id="level">1</strong></div>
- </div>
-
- <div class="layout">
-  <div class="game-area">
-   <div class="board-wrap">
-    <div id="board" aria-label="4列10行のゲーム盤"></div>
-    <div id="comboOverlay" class="combo-overlay">
-     <div class="combo-main" id="comboMain"></div>
-     <div class="combo-sub" id="comboSub"></div>
+<main>
+  <aside class="side">
+    <div class="panel">
+      <div class="panel-title">SCORE</div>
+      <div class="score" id="score">0</div>
     </div>
-   </div>
-   <div class="mobile-controls">
-    <button class="btn" id="leftBtn">←</button>
-    <button class="btn" id="rightBtn">→</button>
-    <button class="btn" id="downBtn">↓</button>
-    <button class="btn" id="dropBtn">DROP</button>
-   </div>
-   <div id="message">スタートを押してゲーム開始！</div>
+    <div class="panel">
+      <div class="panel-title">BEST</div>
+      <div id="best" class="score" style="font-size:17px">0</div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">HOLD</div>
+      <div id="holdDisplay" class="score">—</div>
+      <button id="holdBtn">HOLD</button>
+    </div>
+    <div class="panel">
+      <div class="panel-title">POWER</div>
+      <div class="gauge-shell" id="gaugeShell">
+        <div id="gaugeFill"></div>
+      </div>
+      <div id="chargeText">0%</div>
+      <div id="readyText">CHARGING...</div>
+    </div>
+  </aside>
+
+  <div id="board">
+    <div id="explosionFX"></div>
+    <div id="combo"></div>
   </div>
 
   <aside class="side">
-   <div class="panel">
-    <h2>HOLD</h2>
-    <div id="holdGrid" class="mini-grid"></div>
-    <div id="holdStatus">HOLD AVAILABLE</div>
-   </div>
-   <div class="panel">
-    <h2>NEXT</h2>
-    <div id="nextList"></div>
-   </div>
-   <div class="controls">
-    <button class="btn primary" id="startBtn">ゲーム開始</button>
-    <button class="btn" id="holdBtn">HOLD [C]</button>
-    <button class="btn" id="pauseBtn" disabled>一時停止 [P]</button>
-    <button class="btn" id="restartBtn">リスタート</button>
-   </div>
-   <div class="panel ranking">
-    <h2>🏆 RANKING TOP 5</h2>
-    <div id="rankingList"></div>
-   </div>
-   <div class="panel help">
-    <strong>数字ブロック</strong><br>
-    1〜6は同確率。大きい数字ほど低確率。<br>
-    <strong>💣 ボム</strong><br>
-    置くと周囲8マスを消去。HOLD不可。<br>
-    <strong>合計10</strong><br>
-    縦横の連続した合計10を消去。<br>
-    <strong>GAME OVER</strong><br>
-    いずれかの列が最上段まで積まれると終了。
-   </div>
+    <div class="panel">
+      <div class="panel-title">NEXT</div>
+      <div id="nextDisplay" style="display:flex;flex-direction:column;gap:5px"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">CHAIN</div>
+      <div id="chainDisplay" class="score">0</div>
+      <div class="small">MAX COMBO</div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">RANKING</div>
+      <ol id="rankList" style="padding-left:20px;margin:0;font-size:11px"></ol>
+    </div>
   </aside>
- </div>
- <div class="footer">← → 移動 / ↓ 高速落下 / SPACE 一気に落下 / C HOLD / P 一時停止</div>
+</main>
+
+<footer>
+  <div id="message">同じ列・行で合計10を作ろう！</div>
+  <div class="controls">
+    <button id="leftBtn">◀</button>
+    <button id="downBtn">▼</button>
+    <button id="rightBtn">▶</button>
+    <button id="blastBtn" disabled>✦ 爆発 [ENTER]</button>
+  </div>
+  <div class="controls">
+    <button id="startBtn">START / RESTART</button>
+    <button id="pauseBtn">PAUSE</button>
+  </div>
+</footer>
+
+<div id="overlay">
+  <div class="modal">
+    <h2 id="overlayTitle">SUM 10 CHAIN</h2>
+    <p id="overlayText">
+      数字を縦・横につなげて、合計10にしよう。<br>
+      連鎖するほど爆発ゲージが大きく増える！<br>
+      満タンになったらEnterで12マス爆発。
+    </p>
+    <button id="overlayBtn">GAME START</button>
+  </div>
 </div>
 
 <script>
+(() => {
 "use strict";
 
-const W=4,H=10;
-const BOMB="BOMB";
-const COLORS={
- 1:"#8de4ff",2:"#78c6ff",3:"#8c9bff",
- 4:"#bd91ff",5:"#ed91ff",6:"#ff91c7",
- 7:"#ffab91",8:"#ffd166",9:"#a9e66e"
-};
-const RANK_KEY="make10_tetris_ranking_v1";
-const $=id=>document.getElementById(id);
-const boardEl=$("board");
-const holdGrid=$("holdGrid");
-const nextList=$("nextList");
-const rankingList=$("rankingList");
+const W = 4, H = 10;
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-let board,current,queue,hold,holdUsed;
-let score,level,bestChain,elapsed,chainCount;
-let running=false,paused=false,gameOver=false;
-let lastTime=0,dropCounter=0,rafId=0;
-let scoreRecorded=false;
-let lockTimer=0;
-const LOCK_DELAY=600;
-let comboAnimationTimer;
+const boardEl = $("board");
+const cells = [];
+const board = Array.from({length:H}, () => Array(W).fill(0));
 
-const cells=[];
-for(let y=0;y<H;y++){
- cells[y]=[];
- for(let x=0;x<W;x++){
-  const el=document.createElement("div");
-  el.className="cell";
-  boardEl.appendChild(el);
-  cells[y][x]=el;
- }
+let piece = null;
+let hold = null;
+let holdUsed = false;
+let queue = [];
+let score = 0;
+let best = 0;
+let running = false;
+let paused = false;
+let gameOver = false;
+let resolving = false;
+let lockTimer = 0;
+let lastTime = 0;
+let fallTimer = 0;
+let fallInterval = 750;
+let charge = 0;
+let maxCombo = 0;
+let messageTimer = null;
+let blastCells = new Set();
+let clearCells = new Set();
+let audioCtx = null;
+
+const CHARGE_MAX = 100;
+const LOCK_DELAY = 600;
+const TIME_CHARGE_PER_SECOND = 0.02; // 時間だけでは満タンまで約83分
+const CLEAR_ANIMATION = 280;
+const FALL_ANIMATION = 230;
+
+for (let y=0; y<H; y++) {
+  for (let x=0; x<W; x++) {
+    const el = document.createElement("div");
+    el.className = "cell";
+    el.dataset.x = x;
+    el.dataset.y = y;
+    boardEl.appendChild(el);
+    cells.push(el);
+  }
 }
 
-// 1〜6は各12、7は8、8は5、9は2、ボムは0.5
-// ボムの出現率は約0.57%
-function randomPiece(){
- const total=87.5;
- let r=Math.random()*total;
- const weights=[
-  [1,12],[2,12],[3,12],[4,12],[5,12],[6,12],
-  [7,8],[8,5],[9,2],[BOMB,0.5]
- ];
- for(const [value,weight] of weights){
-  r-=weight;
-  if(r<0)return {value,x:1,y:0};
- }
- return {value:1,x:1,y:0};
-}
+const activeEl = document.createElement("div");
+activeEl.className = "active";
+activeEl.style.display = "none";
+boardEl.appendChild(activeEl);
 
-function makeEmptyBoard(){
- return Array.from({length:H},()=>Array(W).fill(0));
+function randomNumber() {
+  // 1～6は同率、7・8・9は段階的に出にくくする
+  const values = [1,2,3,4,5,6,7,8,9];
+  const weights = [12,12,12,12,12,12,8,5,2];
+  let r = Math.random() * weights.reduce((a,b)=>a+b,0);
+  for (let i=0; i<values.length; i++) {
+    r -= weights[i];
+    if (r < 0) return values[i];
+  }
+  return 1;
 }
-
-function setMessage(text,type=""){
- $("message").textContent=text;
- $("message").className=type;
+function ensureQueue() {
+  while (queue.length < 3) queue.push(randomNumber());
 }
-
-function showCombo(count){
- if(count<2)return;
- const overlay=$("comboOverlay");
- $("comboMain").textContent=`${count} COMBO!`;
- $("comboSub").textContent=`CHAIN BONUS ×${count}`;
- overlay.classList.remove("show");
- void overlay.offsetWidth;
- overlay.classList.add("show");
- clearTimeout(comboAnimationTimer);
- comboAnimationTimer=setTimeout(()=>{
-  overlay.classList.remove("show");
- },1200);
-}
-
-function getRankings(){
- try{
-  const data=JSON.parse(localStorage.getItem(RANK_KEY)||"[]");
-  return Array.isArray(data)?data.filter(r=>
-   r&&Number.isFinite(r.score)&&Number.isFinite(r.date)
-  ).sort((a,b)=>b.score-a.score).slice(0,5):[];
- }catch(e){return []}
-}
-
-function saveRanking(){
- if(scoreRecorded)return;
- scoreRecorded=true;
- const rankings=getRankings();
- rankings.push({score,date:Date.now()});
- rankings.sort((a,b)=>b.score-a.score);
- try{
-  localStorage.setItem(RANK_KEY,JSON.stringify(rankings.slice(0,5)));
- }catch(e){
-  setMessage("ランキングを保存できませんでした。");
- }
- renderRanking();
-}
-
-function renderRanking(){
- const rankings=getRankings();
- rankingList.innerHTML="";
- if(rankings.length===0){
-  const d=document.createElement("div");
-  d.className="rank-row";
-  d.textContent="まだ記録がありません";
-  rankingList.appendChild(d);
-  return;
- }
- rankings.forEach((r,i)=>{
-  const row=document.createElement("div");
-  row.className="rank-row";
-  const name=document.createElement("span");
-  name.className="rank-name";
-  name.textContent=`${i+1}位`;
-  const points=document.createElement("span");
-  points.className="rank-score";
-  points.textContent=r.score.toLocaleString();
-  row.append(name,points);
-  rankingList.appendChild(row);
- });
-}
-
-function init(){
- cancelAnimationFrame(rafId);
- clearTimeout(comboAnimationTimer);
- $("comboOverlay").classList.remove("show");
- board=makeEmptyBoard();
- current=null;
- queue=[randomPiece(),randomPiece(),randomPiece()];
- hold=null;holdUsed=false;
- score=0;level=1;bestChain=0;elapsed=0;chainCount=0;
- running=false;paused=false;gameOver=false;
- lastTime=0;dropCounter=0;lockTimer=0;scoreRecorded=false;
- $("startBtn").disabled=false;
- $("startBtn").textContent="ゲーム開始";
- $("pauseBtn").disabled=true;
- $("pauseBtn").textContent="一時停止 [P]";
- setMessage("スタートを押してゲーム開始！");
- render();
-}
-
-function ensureQueue(){
- while(queue.length<3)queue.push(randomPiece());
-}
-
-function valid(x,y,value){
- return x>=0&&x<W&&y>=0&&y<H&&board[y][x]===0;
-}
-
-function spawnPiece(){
- ensureQueue();
- current=queue.shift();
- ensureQueue();
- current.x=1;current.y=0;
- lockTimer=0;
- holdUsed=false;
- if(!valid(current.x,current.y,current.value)){
-  endGame();return;
- }
- render();
-}
-
-function move(dx,dy){
- if(!running||paused||gameOver||!current)return false;
- if(valid(current.x+dx,current.y+dy,current.value)){
-  current.x+=dx;
-  current.y+=dy;
-  lockTimer=0;
+function spawnPiece() {
+  ensureQueue();
+  piece = {x:1, y:0, value:queue.shift()};
+  ensureQueue();
+  holdUsed = false;
+  lockTimer = 0;
+  fallTimer = 0;
   render();
-  return true;
- }
- return false;
-}
-
-function holdPiece(){
- if(!running||paused||gameOver||!current)return;
- if(current.value===BOMB){
-  setMessage("ボムはホールドできない！");
-  return;
- }
- if(holdUsed){
-  setMessage("このブロックではもうHOLDできない！");
-  return;
- }
- const old=hold;
- hold=current.value;
- holdUsed=true;
- if(old===null){
-  spawnPiece();
-  holdUsed=true;
- }else{
-  current.value=old;
-  current.x=1;current.y=0;
-  lockTimer=0;
-  if(!valid(current.x,current.y,current.value)){
-   endGame();return;
+  if (board[0][piece.x] !== 0) {
+    // 中央列が埋まっているときは、空いている列を探す
+    const emptyX = [0,1,2,3].find(x => board[0][x] === 0);
+    if (emptyX !== undefined) piece.x = emptyX;
+    else endGame();
   }
- }
- setMessage("ホールド！");
- render();
 }
-
-function lockPiece(){
- if(!current||gameOver)return;
- const {x,y,value}=current;
- if(!valid(x,y,value)){
-  endGame();return;
- }
- current=null;
- lockTimer=0;
-
- if(value===BOMB){
-  explodeBomb(x,y);
- }else{
-  board[y][x]=value;
- }
-
- resolveClears();
-
- if(board[0].some(v=>v!==0)){
-  endGame();return;
- }
- if(!gameOver)spawnPiece();
-}
-
-function explodeBomb(x,y){
- let cleared=0;
- for(let dy=-1;dy<=1;dy++){
-  for(let dx=-1;dx<=1;dx++){
-   if(dx===0&&dy===0)continue;
-   const nx=x+dx,ny=y+dy;
-   if(nx<0||nx>=W||ny<0||ny>=H)continue;
-   if(board[ny][nx]!==0){
-    board[ny][nx]=0;
-    cleared++;
-   }
-  }
- }
- compactBoard();
- const bonus=cleared*50;
- score+=bonus;
- setMessage(`💣 ボム爆発！ ${cleared}マス消去！ +${bonus}点`,"good");
- render();
-}
-
-function findMatches(){
- const found=new Set();
-
- function scanLine(coords){
-  for(let start=0;start<coords.length;start++){
-   let sum=0;
-   for(let end=start;end<coords.length;end++){
-    const [y,x]=coords[end];
-    const v=board[y][x];
-    if(v===0||v===BOMB)break;
-    sum+=v;
-    if(sum>10)break;
-    if(sum===10){
-     for(let i=start;i<=end;i++){
-      found.add(coords[i].join(","));
-     }
-     break;
+function render() {
+  for (let y=0; y<H; y++) {
+    for (let x=0; x<W; x++) {
+      const el = cells[y*W+x];
+      const v = board[y][x];
+      el.className = "cell";
+      el.textContent = v || "";
+      if (v) el.classList.add("n"+v);
+      const key = `${x},${y}`;
+      if (clearCells.has(key)) el.classList.add("clearing");
+      if (blastCells.has(key)) el.classList.add("blast");
     }
-   }
   }
- }
-
- for(let y=0;y<H;y++){
-  scanLine(Array.from({length:W},(_,x)=>[y,x]));
- }
- for(let x=0;x<W;x++){
-  scanLine(Array.from({length:H},(_,y)=>[y,x]));
- }
- return [...found].map(k=>k.split(",").map(Number));
+  if (piece && !gameOver) {
+    activeEl.style.display = "flex";
+    activeEl.style.left = `calc(${piece.x} * 25%)`;
+    activeEl.style.top = `calc(${piece.y} * 10%)`;
+    activeEl.style.width = "25%";
+    activeEl.style.height = "10%";
+    activeEl.className = "active n"+piece.value;
+    activeEl.textContent = piece.value;
+  } else {
+    activeEl.style.display = "none";
+  }
+  $("score").textContent = score.toLocaleString();
+  $("best").textContent = best.toLocaleString();
+  $("holdDisplay").textContent = hold ?? "—";
+  $("holdBtn").disabled = !running || paused || resolving || holdUsed || !piece;
+  $("nextDisplay").innerHTML = queue.slice(0,3).map(v =>
+    `<div class="score" style="font-size:19px">${v}</div>`
+  ).join("");
+  updateGauge();
+  renderRanking();
 }
-
-function compactBoard(){
- for(let x=0;x<W;x++){
-  let write=H-1;
-  for(let y=H-1;y>=0;y--){
-   if(board[y][x]!==0){
-    board[write][x]=board[y][x];
-    if(write!==y)board[y][x]=0;
-    write--;
-   }
-  }
-  for(let y=write;y>=0;y--)board[y][x]=0;
- }
+function updateGauge() {
+  const pct = Math.min(100, charge);
+  $("gaugeFill").style.height = pct + "%";
+  $("chargeText").textContent = Math.floor(pct) + "%";
+  const ready = charge >= CHARGE_MAX;
+  $("gaugeShell").classList.toggle("ready", ready);
+  $("blastBtn").classList.toggle("ready", ready);
+  $("blastBtn").disabled = !ready || !running || paused || resolving || !piece;
+  $("readyText").textContent = ready ? "READY!" : "CHARGING...";
+  $("readyText").classList.toggle("ready", ready);
 }
-
-function resolveClears(){
- let totalCleared=0;
- chainCount=0;
-
- while(chainCount<40){
-  const matches=findMatches();
-  if(matches.length===0)break;
-
-  chainCount++;
-  bestChain=Math.max(bestChain,chainCount);
-
-  const unique=new Set(matches.map(([y,x])=>`${y},${x}`));
-  const count=unique.size;
-  totalCleared+=count;
-  score+=count*100*chainCount;
-
-  for(const key of unique){
-   const [y,x]=key.split(",").map(Number);
-   board[y][x]=0;
+function setMessage(text, ms=1500) {
+  $("message").textContent = text;
+  if (messageTimer) clearTimeout(messageTimer);
+  if (ms) messageTimer = setTimeout(() => {
+    if (running && !paused) $("message").textContent = "合計10を作って連鎖を狙おう！";
+  }, ms);
+}
+function canMove(x,y) {
+  return x>=0 && x<W && y>=0 && y<H && board[y][x]===0;
+}
+function move(dx,dy) {
+  if (!running || paused || resolving || !piece) return;
+  const nx = piece.x + dx, ny = piece.y + dy;
+  if (canMove(nx,ny)) {
+    piece.x = nx;
+    piece.y = ny;
+    lockTimer = 0;
+    fallTimer = 0;
+    render();
+  } else if (dy === 1) {
+    // 下に動けなくても即固定せず、600msの猶予を維持
+    lockTimer = Math.max(lockTimer, 1);
   }
+}
+function holdPiece() {
+  if (!running || paused || resolving || !piece || holdUsed) return;
+  const current = piece.value;
+  if (hold === null) {
+    hold = current;
+    spawnPiece();
+  } else {
+    piece.value = hold;
+    hold = current;
+  }
+  holdUsed = true;
+  lockTimer = 0;
+  render();
+}
+function compactBoard() {
+  for (let x=0; x<W; x++) {
+    let write = H-1;
+    for (let y=H-1; y>=0; y--) {
+      if (board[y][x] !== 0) {
+        const value = board[y][x];
+        board[y][x] = 0;
+        board[write][x] = value;
+        write--;
+      }
+    }
+    for (let y=write; y>=0; y--) board[y][x] = 0;
+  }
+}
+function findOneMatch() {
+  // 1回につき1組だけ見つける。消去後に落下させ、再判定する。
+  // 横方向を先に調べる
+  for (let y=0; y<H; y++) {
+    for (let x=0; x<W; x++) {
+      if (!board[y][x]) continue;
+      let sum=0, group=[];
+      for (let xx=x; xx<W; xx++) {
+        if (!board[y][xx]) break;
+        sum += board[y][xx];
+        group.push([xx,y]);
+        if (sum===10 && group.length>=2) return group;
+        if (sum>=10) break;
+      }
+    }
+  }
+  // 縦方向
+  for (let x=0; x<W; x++) {
+    for (let y=0; y<H; y++) {
+      if (!board[y][x]) continue;
+      let sum=0, group=[];
+      for (let yy=y; yy<H; yy++) {
+        if (!board[yy][x]) break;
+        sum += board[yy][x];
+        group.push([x,yy]);
+        if (sum===10 && group.length>=2) return group;
+        if (sum>=10) break;
+      }
+    }
+  }
+  return null;
+}
+function addCharge(combo) {
+  // 1段目 +2.5、2段目 +10、3段目 +22.5、4段目 +40...
+  // comboが増えるほど1段ごとの獲得量も大きく増える。
+  charge = Math.min(CHARGE_MAX, charge + 2.5 * combo * combo);
+  updateGauge();
+}
+function showCombo(n) {
+  if (n < 2) return;
+  const el = $("combo");
+  el.textContent = `${n} COMBO!`;
+  el.classList.remove("show");
+  void el.offsetWidth;
+  el.classList.add("show");
+  setMessage(`${n}コンボ！ CHAIN BONUS ×${n}`, 1000);
+}
+function playTone(freq, duration, type="sine", volume=.04, delay=0) {
+  try {
+    audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+    gain.gain.setValueAtTime(volume, audioCtx.currentTime + delay);
+    gain.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime + delay + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(audioCtx.currentTime + delay);
+    osc.stop(audioCtx.currentTime + delay + duration);
+  } catch(e) {}
+}
+function playClearSound(combo) {
+  playTone(450 + combo*110, .12, "triangle", .035);
+  playTone(700 + combo*150, .16, "sine", .025, .06);
+}
+function playExplosionSound() {
+  playTone(100, .45, "sawtooth", .09);
+  playTone(260, .35, "triangle", .06, .03);
+  playTone(680, .22, "square", .025, .08);
+}
+function clearAnimation(group) {
+  clearCells = new Set(group.map(([x,y])=>`${x},${y}`));
+  render();
+}
+async function resolveClears() {
+  if (resolving) return;
+  resolving = true;
+  let combo = 0;
+  let totalCleared = 0;
+  try {
+    while (true) {
+      const group = findOneMatch();
+      if (!group) break;
+
+      combo++;
+      maxCombo = Math.max(maxCombo, combo);
+      $("chainDisplay").textContent = maxCombo;
+
+      // 1組ずつ消し、盤面が見える時間を挟む
+      clearAnimation(group);
+      if (combo >= 2) showCombo(combo);
+      playClearSound(combo);
+      await sleep(CLEAR_ANIMATION);
+
+      for (const [x,y] of group) board[y][x] = 0;
+      clearCells.clear();
+      totalCleared += group.length;
+      score += group.length * 10 * combo;
+      addCharge(combo);
+      compactBoard();
+      render();
+
+      // ブロックが落ちた盤面を見せてから、次の組を探す
+      await sleep(FALL_ANIMATION);
+    }
+
+    if (totalCleared > 0) {
+      score += totalCleared * 5;
+      render();
+      setMessage(combo >= 2
+        ? `${combo}コンボ達成！ +${totalCleared*5} BONUS`
+        : `${totalCleared}マス消去！`);
+    }
+  } finally {
+    clearCells.clear();
+    resolving = false;
+    render();
+  }
+}
+async function lockPiece() {
+  if (!piece || resolving || !running || paused) return;
+  const {x,y,value} = piece;
+  if (y < 0 || board[y][x] !== 0) {
+    endGame();
+    return;
+  }
+  board[y][x] = value;
+  piece = null;
+  lockTimer = 0;
+  render();
+
+  await resolveClears();
+  if (!running || gameOver) return;
+
+  if (board[0].some(v => v !== 0)) {
+    endGame();
+    return;
+  }
+  spawnPiece();
+}
+function explosionShape(cx,cy) {
+  // 3×3の中心以外の8マス + 上下左右に1マス突き出す4マス = 12マス
+  return [
+    [cx-1,cy-1],[cx,cy-1],[cx+1,cy-1],
+    [cx-1,cy],[cx+1,cy],
+    [cx-1,cy+1],[cx,cy+1],[cx+1,cy+1],
+    [cx,cy-2],[cx,cy+2],[cx-2,cy],[cx+2,cy]
+  ].filter(([x,y]) => x>=0 && x<W && y>=0 && y<H);
+}
+async function explode() {
+  if (!running || paused || resolving || !piece || charge < CHARGE_MAX) return;
+  resolving = true;
+  charge = 0;
+  updateGauge();
+
+  const cx = piece.x, cy = piece.y;
+  const targets = explosionShape(cx,cy);
+  blastCells = new Set(targets.map(([x,y])=>`${x},${y}`));
+  const fx = $("explosionFX");
+  fx.innerHTML = "";
+  const ring = document.createElement("div");
+  ring.className = "blast-ring";
+  ring.style.left = `${(cx+.5)/W*100}%`;
+  ring.style.top = `${(cy+.5)/H*100}%`;
+  fx.appendChild(ring);
+  boardEl.classList.remove("shake");
+  void boardEl.offsetWidth;
+  boardEl.classList.add("shake");
+  playExplosionSound();
+  setMessage("✦ POWER EXPLOSION!!", 1200);
+  render();
+
+  await sleep(430);
+  let removed = 0;
+  for (const [x,y] of targets) {
+    if (board[y][x] !== 0) {
+      board[y][x] = 0;
+      removed++;
+    }
+  }
+  blastCells.clear();
+  fx.innerHTML = "";
   compactBoard();
- }
 
- if(totalCleared>0){
-  setMessage(`${chainCount}連鎖！ ${totalCleared}マス消去！`,"good");
-  showCombo(chainCount);
- }
- updateStats();
-}
-
-function hardDrop(){
- if(!running||paused||gameOver||!current)return;
- let distance=0;
- while(valid(current.x,current.y+1,current.value)){
-  current.y++;
-  distance++;
- }
- score+=distance*2;
- lockPiece();
- updateStats();
-}
-
-function endGame(){
- if(gameOver)return;
- gameOver=true;
- running=false;
- paused=false;
- current=null;
- saveRanking();
- $("pauseBtn").disabled=true;
- $("startBtn").disabled=false;
- $("startBtn").textContent="もう一度プレイ";
- setMessage(`GAME OVER — スコア ${score.toLocaleString()}点`,"bad");
- render();
-}
-
-function startGame(){
- if(gameOver)init();
- if(running&&!paused)return;
- running=true;paused=false;
- $("startBtn").disabled=true;
- $("pauseBtn").disabled=false;
- $("pauseBtn").textContent="一時停止 [P]";
- if(!current)spawnPiece();
- if(gameOver)return;
- lastTime=performance.now();
- dropCounter=0;
- cancelAnimationFrame(rafId);
- rafId=requestAnimationFrame(loop);
- setMessage("ゲーム開始！ 10を作って連鎖を狙おう。");
-}
-
-function togglePause(){
- if(!running||gameOver)return;
- paused=!paused;
- $("pauseBtn").textContent=paused?"再開 [P]":"一時停止 [P]";
- if(paused){
-  setMessage("一時停止中");
- }else{
-  lastTime=performance.now();
-  setMessage("ゲーム再開！");
-  rafId=requestAnimationFrame(loop);
- }
-}
-
-function loop(now){
- if(!running||paused||gameOver)return;
- const dt=Math.min(now-lastTime,100);
- lastTime=now;
- elapsed+=dt;
- level=1+Math.floor(elapsed/20000);
- const interval=Math.max(120,850-(level-1)*65);
-
- dropCounter+=dt;
-
- if(dropCounter>=interval){
-  dropCounter=0;
-  if(current&&valid(current.x,current.y+1,current.value)){
-   current.y++;
-   lockTimer=0;
+  // 爆発後、操作中ブロックの位置が埋まっていたら上へ避難させる
+  while (piece && piece.y > 0 && board[piece.y][piece.x] !== 0) piece.y--;
+  if (piece && board[piece.y][piece.x] !== 0) {
+    resolving = false;
+    endGame();
+    return;
   }
- }
 
- // 着地後は600msの猶予を与える
- if(current&&!valid(current.x,current.y+1,current.value)){
-  lockTimer+=dt;
-  if(lockTimer>=LOCK_DELAY)lockPiece();
- }else{
-  lockTimer=0;
- }
+  score += removed * 15;
+  render();
+  await sleep(FALL_ANIMATION);
+  resolving = false;
 
- updateStats();
- render();
- if(running&&!paused&&!gameOver){
-  rafId=requestAnimationFrame(loop);
- }
-}
-
-function updateStats(){
- $("score").textContent=score.toLocaleString();
- $("bestChain").textContent=bestChain;
- $("level").textContent=level;
-}
-
-function pieceLabel(value){
- return value===BOMB?"💣":value;
-}
-
-function renderMini(container,value){
- container.innerHTML="";
- for(let i=0;i<4;i++){
-  const d=document.createElement("div");
-  d.className="mini-cell";
-  if(value!==null&&i===1){
-   d.textContent=pieceLabel(value);
-   d.style.background=value===BOMB?"#ff594f":COLORS[value];
-   d.style.color="#10131e";
+  // 爆発で盤面が変わった結果、合計10ができていれば連鎖消去
+  await resolveClears();
+  if (running && !gameOver) {
+    if (board[0].some(v=>v!==0)) {
+      endGame();
+      return;
+    }
+    setMessage(`爆発！ ${removed}マスを消去`);
+    render();
   }
-  container.appendChild(d);
- }
 }
-
-function renderSide(){
- renderMini(holdGrid,hold);
- $("holdStatus").textContent=holdUsed?"HOLD USED":"HOLD AVAILABLE";
- nextList.innerHTML="";
- ensureQueue();
-
- queue.slice(0,3).forEach((p,i)=>{
-  const item=document.createElement("div");
-  item.className="next-item";
-  const label=document.createElement("div");
-  label.className="next-label";
-  label.textContent=`NEXT ${i+1}`;
-
-  const grid=document.createElement("div");
-  grid.className="mini-grid";
-  for(let j=0;j<4;j++){
-   const d=document.createElement("div");
-   d.className="mini-cell";
-   if(j===1){
-    d.textContent=pieceLabel(p.value);
-    d.style.background=p.value===BOMB?"#ff594f":COLORS[p.value];
-    d.style.color=p.value===BOMB?"white":"#10131e";
-   }
-   grid.appendChild(d);
+function startGame() {
+  init();
+  $("overlay").classList.add("hidden");
+  running = true;
+  paused = false;
+  gameOver = false;
+  lastTime = performance.now();
+  spawnPiece();
+  setMessage("ゲーム開始！");
+  requestAnimationFrame(loop);
+}
+function init() {
+  for (let y=0; y<H; y++) board[y].fill(0);
+  piece = null;
+  hold = null;
+  holdUsed = false;
+  queue = [];
+  score = 0;
+  charge = 0;
+  maxCombo = 0;
+  fallTimer = 0;
+  lockTimer = 0;
+  fallInterval = 750;
+  resolving = false;
+  clearCells.clear();
+  blastCells.clear();
+  gameOver = false;
+  $("chainDisplay").textContent = "0";
+  render();
+}
+function endGame() {
+  running = false;
+  paused = false;
+  gameOver = true;
+  piece = null;
+  best = Math.max(best,score);
+  saveRanking(score);
+  render();
+  $("overlayTitle").textContent = "GAME OVER";
+  $("overlayText").innerHTML =
+    `SCORE: <b>${score.toLocaleString()}</b><br>` +
+    `最高コンボ: <b>${maxCombo}</b><br>` +
+    `ランキングを更新したかチェックしよう！`;
+  $("overlayBtn").textContent = "もう一度プレイ";
+  $("overlay").classList.remove("hidden");
+}
+function togglePause() {
+  if (!running || gameOver || resolving) return;
+  paused = !paused;
+  $("pauseBtn").textContent = paused ? "RESUME" : "PAUSE";
+  setMessage(paused ? "一時停止中" : "再開！");
+  if (!paused) {
+    lastTime = performance.now();
+    requestAnimationFrame(loop);
   }
-  item.append(label,grid);
-  nextList.appendChild(item);
- });
 }
+function loop(now) {
+  if (!running || paused || gameOver) return;
+  const dt = Math.min(now - lastTime, 100);
+  lastTime = now;
 
-function render(){
- if(!board)return;
- for(let y=0;y<H;y++){
-  for(let x=0;x<W;x++){
-   const el=cells[y][x];
-   let v=board[y][x];
-   const active=!!(current&&!gameOver&&current.x===x&&current.y===y);
-   if(active)v=current.value;
-
-   el.textContent=v?pieceLabel(v):"";
-   el.className="cell";
-
-   if(v===BOMB){
-    el.style.background="#ff594f";
-    el.style.color="white";
-    el.classList.add("filled","bomb");
-   }else{
-    el.style.background=v?COLORS[v]:"#1b2031";
-    el.style.color=v?"#10131e":"";
-    if(v)el.classList.add("filled");
-   }
-   if(active)el.classList.add("active");
+  if (!resolving && piece) {
+    charge = Math.min(CHARGE_MAX, charge + TIME_CHARGE_PER_SECOND * dt / 1000);
+    fallTimer += dt;
+    if (fallTimer >= fallInterval) {
+      fallTimer = 0;
+      if (canMove(piece.x,piece.y+1)) {
+        piece.y++;
+        lockTimer = 0;
+      } else {
+        lockTimer += dt;
+        if (lockTimer >= LOCK_DELAY) {
+          lockPiece();
+        }
+      }
+    } else if (!canMove(piece.x,piece.y+1)) {
+      lockTimer += dt;
+      if (lockTimer >= LOCK_DELAY) lockPiece();
+    } else {
+      lockTimer = 0;
+    }
+    // 時間経過で少しずつ速くなる
+    fallInterval = Math.max(220, 750 - Math.floor(score/250)*12);
+    render();
   }
- }
- updateStats();
- renderSide();
- renderRanking();
+  requestAnimationFrame(loop);
+}
+function saveRanking(s) {
+  try {
+    const scores = JSON.parse(localStorage.getItem("sum10chain-ranks") || "[]");
+    scores.push(s);
+    scores.sort((a,b)=>b-a);
+    localStorage.setItem("sum10chain-ranks", JSON.stringify(scores.slice(0,5)));
+  } catch(e) {}
+}
+function renderRanking() {
+  let scores = [];
+  try { scores = JSON.parse(localStorage.getItem("sum10chain-ranks") || "[]"); }
+  catch(e) {}
+  $("rankList").innerHTML = "";
+  if (!scores.length) {
+    $("rankList").innerHTML = "<li>—</li>";
+    return;
+  }
+  scores.slice(0,5).forEach(s => {
+    const li = document.createElement("li");
+    li.textContent = s.toLocaleString();
+    $("rankList").appendChild(li);
+  });
 }
 
-$("startBtn").addEventListener("click",startGame);
-$("restartBtn").addEventListener("click",()=>{
- init();startGame();
-});
-$("pauseBtn").addEventListener("click",togglePause);
-$("holdBtn").addEventListener("click",holdPiece);
 $("leftBtn").addEventListener("click",()=>move(-1,0));
 $("rightBtn").addEventListener("click",()=>move(1,0));
 $("downBtn").addEventListener("click",()=>{
- if(move(0,1)){score++;updateStats();}
- else if(running&&!paused&&!gameOver)lockPiece();
+  if (!running || paused || resolving || !piece) return;
+  if (canMove(piece.x,piece.y+1)) {
+    piece.y++;
+    lockTimer = 0;
+    fallTimer = 0;
+    render();
+  } else {
+    lockTimer = Math.max(lockTimer,1);
+  }
 });
-$("dropBtn").addEventListener("click",hardDrop);
+$("holdBtn").addEventListener("click",holdPiece);
+$("blastBtn").addEventListener("click",explode);
+$("startBtn").addEventListener("click",startGame);
+$("pauseBtn").addEventListener("click",togglePause);
+$("overlayBtn").addEventListener("click",startGame);
 
-document.addEventListener("keydown",e=>{
- if(["ArrowLeft","ArrowRight","ArrowDown"," "].includes(e.key)){
-  e.preventDefault();
- }
- if(e.repeat&&["c","C","p","P"," "].includes(e.key))return;
- if(e.key==="Enter"&&!running&&!gameOver)startGame();
- if(e.key==="ArrowLeft")move(-1,0);
- if(e.key==="ArrowRight")move(1,0);
- if(e.key==="ArrowDown"){
-  if(move(0,1)){score++;updateStats();}
-  else if(running&&!paused&&!gameOver)lockPiece();
- }
- if(e.key===" ")hardDrop();
- if(e.key==="c"||e.key==="C")holdPiece();
- if(e.key==="p"||e.key==="P")togglePause();
+document.addEventListener("keydown", e => {
+  if (["ArrowLeft","ArrowRight","ArrowDown","Enter"," "].includes(e.key)) e.preventDefault();
+  if (e.repeat && (e.key==="Enter" || e.key===" " || e.key==="c" || e.key==="C")) return;
+  if (e.key==="ArrowLeft" || e.key==="a" || e.key==="A") move(-1,0);
+  else if (e.key==="ArrowRight" || e.key==="d" || e.key==="D") move(1,0);
+  else if (e.key==="ArrowDown" || e.key==="s" || e.key==="S") {
+    if (running && !paused && !resolving && piece && canMove(piece.x,piece.y+1)) {
+      piece.y++;
+      lockTimer=0;
+      fallTimer=0;
+      render();
+    }
+  }
+  else if (e.key==="c" || e.key==="C" || e.key==="Shift") holdPiece();
+  else if (e.key==="Enter") {
+    if (!running || paused) return;
+    if (charge>=CHARGE_MAX) explode();
+  }
+  else if (e.key==="Escape" || e.key==="p" || e.key==="P") togglePause();
 });
 
-renderRanking();
-init();
+// スマホで長押し移動しやすくする
+for (const [id,dx] of [["leftBtn",-1],["rightBtn",1]]) {
+  let repeatId;
+  const btn = $(id);
+  btn.addEventListener("pointerdown", () => {
+    repeatId = setInterval(()=>move(dx,0),130);
+  });
+  for (const ev of ["pointerup","pointerleave","pointercancel"]) {
+    btn.addEventListener(ev,()=>clearInterval(repeatId));
+  }
+}
+render();
+})();
 </script>
 </body>
 </html>
