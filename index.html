@@ -36,6 +36,10 @@ main{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
 #judgement.show{animation:judgePop 1.05s ease-out forwards}
 #judgement .judge-number{display:block;font-size:clamp(42px,11vw,72px);line-height:1;color:#ffe66d;-webkit-text-stroke:2px #9b4b22}
 #judgement .judge-word{display:block;font-size:clamp(22px,6vw,38px);color:#fff}
+#judgement .make-label{display:block;font-size:clamp(22px,6vw,38px);color:#fff;letter-spacing:2px}
+#timerValue{font-size:clamp(18px,4vw,25px);font-weight:900;font-variant-numeric:tabular-nums;color:#eafcff}
+#timerValue.warning{color:#ffcf68;text-shadow:0 0 10px #ff9d35}
+#timerValue.critical{color:#ff647d;text-shadow:0 0 12px #ff334f;animation:pulse .5s infinite alternate}
 #judgement.make-ten{text-shadow:0 2px 0 #24516a,0 0 12px #8eeeff99}
 #judgement.make-ten .make-ten-word{display:block;font-size:clamp(25px,6vw,42px);letter-spacing:2px;color:#eafcff;-webkit-text-stroke:1px #3986a4}
 @keyframes judgePop{0%{opacity:0;transform:translate(-50%,-50%) scale(.25) rotate(-10deg)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.2) rotate(4deg)}35%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-75%) scale(.85)}}
@@ -89,6 +93,7 @@ button:disabled{opacity:.35}
 </header>
 <main>
 <aside class="side">
+<div class="panel" id="timerPanel" style="display:none"><div class="panel-title">TIME</div><div id="timerValue">03:00</div></div>
 <div class="panel"><div class="panel-title">SCORE</div><div class="score" id="score">0</div></div>
 <div class="panel"><div class="panel-title">BEST</div><div class="score" id="best" style="font-size:17px">0</div></div>
 <div class="panel"><div class="panel-title">HOLD</div><div id="holdDisplay" class="score">—</div><button id="holdBtn">HOLD</button></div>
@@ -127,6 +132,7 @@ const boardEl=$("board"),cells=[],board=Array.from({length:H},()=>Array(W).fill(
 let piece=null,hold=null,holdUsed=false,queue=[],score=0,best=0;
 let selectedMode="normal";
 let running=false,paused=false,gameOver=false,resolving=false;
+let challengeTimeLeft=180000;
 let lockTimer=0,groundedTimer=0,groundedY=-1,lastTime=0,fallTimer=0,fallInterval=750,charge=0,maxCombo=0;
 let messageTimer=null,blastCells=new Set(),clearCells=new Set(),audioCtx=null;
 const CHARGE_MAX=100,LOCK_DELAY=600,MAX_GROUNDED_TIME=3000,TIME_CHARGE_PER_SECOND=.02;
@@ -214,7 +220,7 @@ function compactBoard(){
 // モードごとに許可された合計だけを消去対象にする
 function findAllMatches(){
  const matched=new Set();let biggestTarget=0;
- const allowedTargets=selectedMode==="challenge"?[10,30,50,70,90]:[10];
+ const allowedTargets=selectedMode==="challenge"?[10,20,30,40,50,60,70,80,90]:[10];
  const addSegment=(coords,sum)=>{
   if(coords.length<2||!allowedTargets.includes(sum))return;
   biggestTarget=Math.max(biggestTarget,sum);
@@ -264,11 +270,19 @@ function playClearSound(combo){
  playTone(pitch,.075,"sine",.018);
  playTone(pitch*1.45,.095,"sine",.012,.035);
 }
-const JUDGEMENTS={10:"Good",30:"Great",50:"Excellent",70:"Wonderful",90:"Perfect"};
+const JUDGEMENTS={20:"Nice",30:"Great",40:"Excellent",50:"Amazing",60:"Wonderful",70:"Fantastic",80:"Perfect",90:"Perfect!!"};
+const CHALLENGE_POINTS={10:10,20:40,30:160,40:640,50:2560,60:10240,70:40960,80:163840,90:655360};
+function updateChallengeTimer(){
+ const el=$("timerValue");
+ const seconds=Math.max(0,Math.ceil(challengeTimeLeft/1000));
+ el.textContent=`${String(Math.floor(seconds/60)).padStart(2,"0")}:${String(seconds%60).padStart(2,"0")}`;
+ el.classList.toggle("warning",seconds<=30&&seconds>10);
+ el.classList.toggle("critical",seconds<=10);
+}
 function showJudgement(target){
  const word=JUDGEMENTS[target];
  if(!word)return;
- const el=$("judgement");el.classList.remove("make-ten");el.innerHTML=`<span class="judge-number">${target}</span><span class="judge-word">${word}</span>`;
+ const el=$("judgement");el.classList.remove("make-ten");el.innerHTML=`<span class="judge-number" style="font-size:clamp(30px,8vw,54px)">MAKE ${target}!</span><span class="make-label">${word}</span>`;
  el.classList.remove("show");void el.offsetWidth;el.classList.add("show");
 }
 function showMakeTen(){
@@ -286,7 +300,6 @@ function playJudgementSound(target){
  if(level>=6)playTone(base*2,.32,"triangle",.025,.2);
 }
 function playExplosionSound(){
- // 低音の衝撃、下降する爆風、金属的な高音を重ねた大規模爆発音
  try{
   audioCtx ||=new(window.AudioContext||window.webkitAudioContext)();
   if(audioCtx.state==="suspended")audioCtx.resume();
@@ -324,17 +337,17 @@ async function resolveClears(){
    combo++;maxCombo=Math.max(maxCombo,combo);$("chainDisplay").textContent=maxCombo;
    clearAnimation(group);if(combo>=2)showCombo(combo);
    if(selectedMode==="challenge"&&JUDGEMENTS[match.target]){showJudgement(match.target);playJudgementSound(match.target)}
-   else{if(match.target===10)showMakeTen();playClearSound(combo);}
+   else{if(match.target===10)showMakeTen();playClearSound(combo)}
    await sleep(CLEAR_ANIMATION);
    let clearedValue=0;for(const [x,y] of group){clearedValue+=board[y][x];board[y][x]=0}
    clearCells.clear();totalCleared+=group.length;
-   if(selectedMode==="challenge")score+=clearedValue*10*combo;
+   if(selectedMode==="challenge")score+=(CHALLENGE_POINTS[match.target]||10)*combo;
    else score+=group.length*10*combo;
    addCharge(combo);
    compactBoard();render();await sleep(FALL_ANIMATION);
   }
   if(totalCleared>0){
-   score+=totalCleared*5;render();
+   if(selectedMode!=="challenge")score+=totalCleared*5;render();
    setMessage(combo>=2?`${combo}コンボ達成！ +${totalCleared*5} BONUS`:`${totalCleared}マス消去！`);
   }
  }finally{clearCells.clear();resolving=false;render()}
@@ -350,7 +363,6 @@ async function lockPiece(){
  spawnPiece();
 }
 function explosionShape(cx,cy){
- // 周囲12マスに加えて、中心の落下ブロックも爆発で消す
  return [[cx,cy],[cx-1,cy-1],[cx,cy-1],[cx+1,cy-1],[cx-1,cy],[cx+1,cy],
  [cx-1,cy+1],[cx,cy+1],[cx+1,cy+1],[cx,cy-2],[cx,cy+2],[cx-2,cy],[cx+2,cy]]
  .filter(([x,y])=>x>=0&&x<W&&y>=0&&y<H);
@@ -379,7 +391,6 @@ async function explode(){
  }
  boardEl.classList.remove("shake");void boardEl.offsetWidth;boardEl.classList.add("shake");
  playExplosionSound();setMessage("✦ MEGA EXPLOSION!!",1500);render();activeEl.classList.add("blast-center");await sleep(680);
- // 中心の落下ブロックも消滅。周囲の盤面ブロックと合わせて消去数に含める
  let removed=1;
  for(const [x,y] of targets){
   if(x===cx&&y===cy)continue;
@@ -396,10 +407,11 @@ async function explode(){
 }
 function startGame(mode=selectedMode){
  selectedMode=mode;
- $("subtitle").textContent=selectedMode==="challenge"?"CHALLENGE · SUM 10 / 30 / 50 / 70 / 90 · BIGGER SUM, BIGGER SCORE":selectedMode==="super"?"SUPER SPEED · 100MS START · KEEP ACCELERATING":selectedMode==="speed"?"SPEED · FAST START · KEEP ACCELERATING":"NORMAL · SUM 10 · CONNECT · CLEAR · CHAIN";
+ $("subtitle").textContent=selectedMode==="challenge"?"CHALLENGE · SUM 10–90 · 3 MIN SCORE ATTACK":selectedMode==="super"?"SUPER SPEED · 100MS START · KEEP ACCELERATING":selectedMode==="speed"?"SPEED · FAST START · KEEP ACCELERATING":"NORMAL · SUM 10 · CONNECT · CLEAR · CHAIN";
  renderRanking();
  $("overlay").classList.add("hidden");$("modeButtons").style.display="none";$("overlayBtn").style.display="none";$("modeSelectBtn").style.display="none";
  init();running=true;paused=false;gameOver=false;
+ challengeTimeLeft=180000;$("timerPanel").style.display=selectedMode==="challenge"?"block":"none";updateChallengeTimer();
  lastTime=performance.now();spawnPiece();setMessage("ゲーム開始！");requestAnimationFrame(loop);
 }
 function init(){
@@ -408,10 +420,10 @@ function init(){
  fallTimer=0;lockTimer=0;groundedTimer=0;groundedY=-1;fallInterval=750;resolving=false;
  clearCells.clear();blastCells.clear();gameOver=false;$("chainDisplay").textContent="0";render();
 }
-function endGame(){
+function endGame(reason="gameover"){
  running=false;paused=false;gameOver=true;piece=null;best=Math.max(best,score);saveRanking(score,selectedMode);render();
- $("overlayTitle").textContent="GAME OVER";
- $("overlayText").innerHTML=`${selectedMode==="challenge"?"CHALLENGE":selectedMode==="super"?"SUPER SPEED":selectedMode==="speed"?"SPEED":"NORMAL"}<br>SCORE: <b>${score.toLocaleString()}</b><br>最高コンボ: <b>${maxCombo}</b>`;
+ $("overlayTitle").textContent=reason==="timeup"?"TIME UP!":"GAME OVER";
+ $("overlayText").innerHTML=`${selectedMode==="challenge"?"CHALLENGE":selectedMode==="super"?"SUPER SPEED":selectedMode==="speed"?"SPEED":"NORMAL"}<br>SCORE: <b>${score.toLocaleString()}</b><br>最高コンボ: <b>${maxCombo}</b>${reason==="timeup"?"<br>3分間お疲れさま！":""}`;
  $("modeButtons").style.display="none";$("overlayBtn").style.display="inline-block";$("overlayBtn").textContent="同じモードでもう一度";
  $("modeSelectBtn").style.display="inline-block";$("overlay").classList.remove("hidden");
 }
@@ -424,10 +436,13 @@ function togglePause(){
 function loop(now){
  if(!running||paused||gameOver)return;
  const dt=Math.min(now-lastTime,100);lastTime=now;
+ if(selectedMode==="challenge") {
+  challengeTimeLeft=Math.max(0,challengeTimeLeft-dt);updateChallengeTimer();
+  if(challengeTimeLeft<=0&&!resolving){endGame("timeup");return}
+ }
  if(!resolving&&piece){
   charge=Math.min(CHARGE_MAX,charge+TIME_CHARGE_PER_SECOND*dt/1000);
   fallTimer+=dt;
-  // 50点ごとに加速。上限を設けず、終盤も同じ加速率を維持する
   const level=Math.floor(score/50);
   const isFastMode=selectedMode==="speed"||selectedMode==="super";
   const baseInterval=selectedMode==="super"?100:selectedMode==="speed"?200:750;
@@ -437,17 +452,12 @@ function loop(now){
    fallTimer=0;
    if(canMove(piece.x,piece.y+1))piece.y++;
   }
-
   const grounded=!canMove(piece.x,piece.y+1);
   if(!grounded){
-   // 下に落ちられる状態になったら、着地時間と停止時間をリセット
    groundedTimer=0;groundedY=-1;lockTimer=0;
   }else{
-   // 同じ高さで着地し続けた時間。左右移動ではリセットしない
-   if(groundedY!==piece.y){groundedY=piece.y;groundedTimer=0;lockTimer=0;}
-   groundedTimer+=dt;
-   // 操作を止めている時間。左右移動すると move() 側でリセットされる
-   lockTimer+=dt;
+   if(groundedY!==piece.y){groundedY=piece.y;groundedTimer=0;lockTimer=0}
+   groundedTimer+=dt;lockTimer+=dt;
    if(groundedTimer>=MAX_GROUNDED_TIME||lockTimer>=LOCK_DELAY)lockPiece();
   }
   render();
