@@ -38,9 +38,10 @@ main{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
 #judgement .judge-word{display:block;font-size:clamp(22px,6vw,38px);color:#fff}
 @keyframes judgePop{0%{opacity:0;transform:translate(-50%,-50%) scale(.25) rotate(-10deg)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.2) rotate(4deg)}35%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-75%) scale(.85)}}
 .mode-buttons{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
-.mode-buttons button{min-width:115px;padding:11px 14px;font-size:14px}
+.mode-buttons button{min-width:105px;padding:11px 12px;font-size:14px}
 #normalModeBtn{border-color:#50e7ff;color:#50e7ff}
 #challengeModeBtn{border-color:#ffbd59;color:#ffcf78}
+#speedModeBtn{border-color:#ff6b9d;color:#ff9fbd}
 #modeSelectBtn{display:none;margin-top:8px}
 @keyframes comboPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(-9deg)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.2) rotate(3deg)}38%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-80%) scale(.9)}}
 #board.shake{animation:shake .28s linear}
@@ -102,7 +103,7 @@ button:disabled{opacity:.35}
 <div id="overlay"><div class="modal">
 <h2 id="overlayTitle">SUM CHAIN</h2>
 <p id="overlayText">プレイするモードを選んでね。<br>スペースキーで一気に落下。</p>
-<div class="mode-buttons" id="modeButtons"><button id="normalModeBtn">NORMAL</button><button id="challengeModeBtn">CHALLENGE</button></div>
+<div class="mode-buttons" id="modeButtons"><button id="normalModeBtn">NORMAL</button><button id="challengeModeBtn">CHALLENGE</button><button id="speedModeBtn">SPEED</button></div>
 <button id="overlayBtn" style="display:none">もう一度プレイ</button><button id="modeSelectBtn">モード選択へ</button>
 </div></div>
 
@@ -332,7 +333,7 @@ async function explode(){
 }
 function startGame(mode=selectedMode){
  selectedMode=mode;
- $("subtitle").textContent=selectedMode==="challenge"?"CHALLENGE · SUM 10 / 30 / 50 / 70 / 90 · BIGGER SUM, BIGGER SCORE":"NORMAL · SUM 10 · CONNECT · CLEAR · CHAIN";
+ $("subtitle").textContent=selectedMode==="challenge"?"CHALLENGE · SUM 10 / 30 / 50 / 70 / 90 · BIGGER SUM, BIGGER SCORE":selectedMode==="speed"?"SPEED · FAST START · KEEP ACCELERATING":"NORMAL · SUM 10 · CONNECT · CLEAR · CHAIN";
  renderRanking();
  $("overlay").classList.add("hidden");$("modeButtons").style.display="none";$("overlayBtn").style.display="none";$("modeSelectBtn").style.display="none";
  init();running=true;paused=false;gameOver=false;
@@ -347,7 +348,7 @@ function init(){
 function endGame(){
  running=false;paused=false;gameOver=true;piece=null;best=Math.max(best,score);saveRanking(score,selectedMode);render();
  $("overlayTitle").textContent="GAME OVER";
- $("overlayText").innerHTML=`${selectedMode==="challenge"?"CHALLENGE":"NORMAL"}<br>SCORE: <b>${score.toLocaleString()}</b><br>最高コンボ: <b>${maxCombo}</b>`;
+ $("overlayText").innerHTML=`${selectedMode==="challenge"?"CHALLENGE":selectedMode==="speed"?"SPEED":"NORMAL"}<br>SCORE: <b>${score.toLocaleString()}</b><br>最高コンボ: <b>${maxCombo}</b>`;
  $("modeButtons").style.display="none";$("overlayBtn").style.display="inline-block";$("overlayBtn").textContent="同じモードでもう一度";
  $("modeSelectBtn").style.display="inline-block";$("overlay").classList.remove("hidden");
 }
@@ -363,9 +364,11 @@ function loop(now){
  if(!resolving&&piece){
   charge=Math.min(CHARGE_MAX,charge+TIME_CHARGE_PER_SECOND*dt/1000);
   fallTimer+=dt;
-  // 50点ごとに加速。終盤は最低80ms間隔まで速くなる
+  // 50点ごとに加速。速度の上限は設けず、終盤も同じ加速率を維持する
   const level=Math.floor(score/50);
-  fallInterval=Math.max(80,750*Math.pow(.90,level));
+  const baseInterval=selectedMode==="speed"?500:750;
+  const acceleration=selectedMode==="speed"?.89:.90;
+  fallInterval=baseInterval*Math.pow(acceleration,level);
   if(fallTimer>=fallInterval){
    fallTimer=0;
    if(canMove(piece.x,piece.y+1)){piece.y++;lockTimer=0}
@@ -417,6 +420,7 @@ $("pauseBtn").addEventListener("click",togglePause);
 $("overlayBtn").addEventListener("click",()=>startGame(selectedMode));
 $("normalModeBtn").addEventListener("click",()=>startGame("normal"));
 $("challengeModeBtn").addEventListener("click",()=>startGame("challenge"));
+$("speedModeBtn").addEventListener("click",()=>startGame("speed"));
 $("modeSelectBtn").addEventListener("click",()=>{
  running=false;paused=false;piece=null;selectedMode="normal";
  $("overlayTitle").textContent="SUM CHAIN";
