@@ -283,6 +283,7 @@ function lockPiece(){
  resolveMatches();
  if(running)spawnNext();
 }
+
 function findAllMatches(){
  const groups=[],seen=new Set();
  for(let y=0;y<ROWS;y++){
@@ -291,18 +292,24 @@ function findAllMatches(){
    for(const [dx,dy] of [[1,0],[0,1]]){
     let cells=[],sum=0,cx=x,cy=y;
     while(cx<COLS&&cy<ROWS&&board[cy][cx]){
-     cells.push([cx,cy]);sum+=board[cy][cx];cx+=dx;cy+=dy;
+     cells.push([cx,cy]);
+     sum+=board[cy][cx];
+     cx+=dx;
+     cy+=dy;
     }
     if(TARGETS.includes(sum)&&cells.length>=2){
      const key=cells.map(([a,b])=>`${a},${b}`).join("|");
-     if(!seen.has(key)){seen.add(key);groups.push({cells,sum})}
+     if(!seen.has(key)){
+      seen.add(key);
+      groups.push({cells,sum});
+     }
     }
    }
   }
  }
- }
  return groups;
 }
+
 function resolveMatches(){
  let chain=0;
  while(true){
