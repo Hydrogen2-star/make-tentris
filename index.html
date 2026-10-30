@@ -42,6 +42,7 @@ main{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
 #normalModeBtn{border-color:#50e7ff;color:#50e7ff}
 #challengeModeBtn{border-color:#ffbd59;color:#ffcf78}
 #speedModeBtn{border-color:#ff6b9d;color:#ff9fbd}
+#superModeBtn{border-color:#c58bff;color:#d8b5ff}
 #modeSelectBtn{display:none;margin-top:8px}
 @keyframes comboPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(-9deg)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.2) rotate(3deg)}38%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-80%) scale(.9)}}
 #board.shake{animation:shake .28s linear}
@@ -105,7 +106,7 @@ button:disabled{opacity:.35}
 <div id="overlay"><div class="modal">
 <h2 id="overlayTitle">SUM CHAIN</h2>
 <p id="overlayText">プレイするモードを選んでね。<br>スペースキーで一気に落下。</p>
-<div class="mode-buttons" id="modeButtons"><button id="normalModeBtn">NORMAL</button><button id="challengeModeBtn">CHALLENGE</button><button id="speedModeBtn">SPEED</button></div>
+<div class="mode-buttons" id="modeButtons"><button id="normalModeBtn">NORMAL</button><button id="challengeModeBtn">CHALLENGE</button><button id="speedModeBtn">SPEED</button><button id="superModeBtn">SUPER SPEED</button></div>
 <button id="overlayBtn" style="display:none">もう一度プレイ</button><button id="modeSelectBtn">モード選択へ</button>
 </div></div>
 
@@ -128,7 +129,6 @@ for(let y=0;y<H;y++)for(let x=0;x<W;x++){
 }
 const activeEl=document.createElement("div");activeEl.className="active";activeEl.style.display="none";boardEl.appendChild(activeEl);
 
-// モード別の出現確率
 function randomNumber(){
  const values=[1,2,3,4,5,6,7,8,9];
  const weights=selectedMode==="challenge"?[1,1,1,1,1,1,1,1,1]:[6,10,13,14,14,14,13,10,6];
@@ -200,8 +200,6 @@ function compactBoard(){
   for(let y=write;y>=0;y--)board[y][x]=0;
  }
 }
-
-// モードごとに許可された合計だけを消去対象にする
 function findAllMatches(){
  const matched=new Set();let biggestTarget=0;
  const allowedTargets=selectedMode==="challenge"?[10,30,50,70,90]:[10];
@@ -250,7 +248,6 @@ function playTone(freq,duration,type="sine",volume=.04,delay=0){
  }catch(e){}
 }
 function playClearSound(combo){
- // NORMAL / SPEED：連鎖の邪魔をしない、短く控えめな消去音
  const pitch=420+Math.min(combo-1,5)*45;
  playTone(pitch,.075,"sine",.018);
  playTone(pitch*1.45,.095,"sine",.012,.035);
@@ -337,7 +334,7 @@ async function explode(){
 }
 function startGame(mode=selectedMode){
  selectedMode=mode;
- $("subtitle").textContent=selectedMode==="challenge"?"CHALLENGE · SUM 10 / 30 / 50 / 70 / 90 · BIGGER SUM, BIGGER SCORE":selectedMode==="speed"?"SPEED · FAST START · KEEP ACCELERATING":"NORMAL · SUM 10 · CONNECT · CLEAR · CHAIN";
+ $("subtitle").textContent=selectedMode==="challenge"?"CHALLENGE · SUM 10 / 30 / 50 / 70 / 90 · BIGGER SUM, BIGGER SCORE":selectedMode==="super"?"SUPER SPEED · 100MS START · KEEP ACCELERATING":selectedMode==="speed"?"SPEED · FAST START · KEEP ACCELERATING":"NORMAL · SUM 10 · CONNECT · CLEAR · CHAIN";
  renderRanking();
  $("overlay").classList.add("hidden");$("modeButtons").style.display="none";$("overlayBtn").style.display="none";$("modeSelectBtn").style.display="none";
  init();running=true;paused=false;gameOver=false;
@@ -352,7 +349,7 @@ function init(){
 function endGame(){
  running=false;paused=false;gameOver=true;piece=null;best=Math.max(best,score);saveRanking(score,selectedMode);render();
  $("overlayTitle").textContent="GAME OVER";
- $("overlayText").innerHTML=`${selectedMode==="challenge"?"CHALLENGE":selectedMode==="speed"?"SPEED":"NORMAL"}<br>SCORE: <b>${score.toLocaleString()}</b><br>最高コンボ: <b>${maxCombo}</b>`;
+ $("overlayText").innerHTML=`${selectedMode==="challenge"?"CHALLENGE":selectedMode==="super"?"SUPER SPEED":selectedMode==="speed"?"SPEED":"NORMAL"}<br>SCORE: <b>${score.toLocaleString()}</b><br>最高コンボ: <b>${maxCombo}</b>`;
  $("modeButtons").style.display="none";$("overlayBtn").style.display="inline-block";$("overlayBtn").textContent="同じモードでもう一度";
  $("modeSelectBtn").style.display="inline-block";$("overlay").classList.remove("hidden");
 }
@@ -370,8 +367,9 @@ function loop(now){
   fallTimer+=dt;
   // 50点ごとに加速。上限を設けず、終盤も同じ加速率を維持する
   const level=Math.floor(score/50);
-  const baseInterval=selectedMode==="speed"?200:750;
-  const acceleration=selectedMode==="speed"?.89:.90;
+  const isFastMode=selectedMode==="speed"||selectedMode==="super";
+  const baseInterval=selectedMode==="super"?100:selectedMode==="speed"?200:750;
+  const acceleration=isFastMode?.89:.90;
   fallInterval=baseInterval*Math.pow(acceleration,level);
   if(fallTimer>=fallInterval){
    fallTimer=0;
@@ -425,6 +423,7 @@ $("overlayBtn").addEventListener("click",()=>startGame(selectedMode));
 $("normalModeBtn").addEventListener("click",()=>startGame("normal"));
 $("challengeModeBtn").addEventListener("click",()=>startGame("challenge"));
 $("speedModeBtn").addEventListener("click",()=>startGame("speed"));
+$("superModeBtn").addEventListener("click",()=>startGame("super"));
 $("modeSelectBtn").addEventListener("click",()=>{
  running=false;paused=false;piece=null;selectedMode="normal";
  $("overlayTitle").textContent="SUM CHAIN";
