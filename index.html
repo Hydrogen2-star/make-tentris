@@ -15,7 +15,7 @@ header{width:100%;text-align:center;padding:8px 0 4px;flex-shrink:0}
 .tracker-title{font-size:9px;letter-spacing:2px;color:#d9bd83;text-align:center;margin-bottom:5px;font-weight:900}
 .tracker-items{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:4px}
 .tracker-item{border:1px solid #3d3a3c;border-radius:6px;background:#11151e;color:#555d6c;text-align:center;padding:3px 0;font-size:clamp(11px,2.8vw,15px);font-weight:950;text-shadow:none;transition:all .25s}
-.tracker-item.lit{color:#fff3a5;border-color:#ffd166;background:linear-gradient(145deg,#795323,#33291d);box-shadow:0 0 9px #ffc44d88, inset 0 0 8px #ffe7a044;text-shadow:0 0 8px #ffe27a}
+.tracker-item.lit{color:#fff3a5;border-color:#ffd166;background:linear-gradient(145deg,#795323,#33291d);box-shadow:0 0 9px #ffc44d88,inset 0 0 8px #ffe7a044;text-shadow:0 0 8px #ffe27a}
 .tracker-item.reach{animation:trackerReach .65s ease-in-out infinite alternate}
 .tracker-item.bingo{animation:trackerBingo .45s ease-in-out 3}
 @keyframes trackerReach{to{transform:translateY(-3px) scale(1.07);box-shadow:0 0 18px #ffdc66;border-color:#fff4b0}}
@@ -99,7 +99,42 @@ button:disabled{opacity:.35}
 .modal{width:min(330px,100%);border:1px solid #4a5d7b;border-radius:16px;background:#182236;padding:22px;text-align:center}
 .modal h2{margin:0 0 10px;color:var(--cyan)}
 .modal p{font-size:13px;line-height:1.8;color:#c0cce0}
-@media(max-height:600px){header{padding:3px 0}.subtitle{display:none}#challengeTracker{padding:3px 6px;margin:0 auto 2px}.tracker-title{margin-bottom:2px}#board{height:58dvh;width:min(38vw,calc(58dvh * .43))}.gauge-shell{height:105px}.side{gap:4px}.panel{padding:4px 3px}footer{gap:3px;padding-top:2px}button{padding:6px 8px}}
+
+/* チャレンジモード専用レイアウト */
+body.challenge-mode main{justify-content:center;gap:clamp(10px,3vw,28px)}
+body.challenge-mode main>.side:first-child{width:clamp(76px,19vw,132px);gap:7px}
+body.challenge-mode main>.side:last-child{display:none}
+body.challenge-mode #powerPanel{display:none}
+body.challenge-mode #board{height:min(61dvh,620px);width:min(43vw,300px,calc(61dvh * .43))}
+body.challenge-mode #challengeTracker{width:min(560px,96vw);margin:3px auto 5px}
+body.challenge-mode footer{gap:6px;padding-top:5px}
+body.challenge-mode footer #message{display:none}
+body.challenge-mode footer .controls:nth-of-type(2){gap:12px}
+body.challenge-mode footer .controls:nth-of-type(2) button{min-width:clamp(58px,15vw,82px);font-size:18px;padding:10px 8px}
+body.challenge-mode #startBtn{min-width:190px;padding:10px 20px;font-size:14px}
+body.challenge-mode #blastBtn{display:none}
+@media(max-height:650px){
+ body.challenge-mode header{padding:2px 0}
+ body.challenge-mode #challengeTracker{padding:3px 6px;margin:0 auto 2px}
+ body.challenge-mode .tracker-title{margin-bottom:2px}
+ body.challenge-mode main>.side:first-child{gap:4px}
+ body.challenge-mode main>.side:first-child .panel{padding:5px 3px}
+ body.challenge-mode #board{height:56dvh;width:min(39vw,calc(56dvh * .43))}
+ body.challenge-mode footer{gap:3px;padding-top:2px}
+ body.challenge-mode footer .controls:nth-of-type(2) button{padding:6px 8px}
+}
+@media(max-height:600px){
+ header{padding:3px 0}
+ .subtitle{display:none}
+ #challengeTracker{padding:3px 6px;margin:0 auto 2px}
+ .tracker-title{margin-bottom:2px}
+ #board{height:58dvh;width:min(38vw,calc(58dvh * .43))}
+ .gauge-shell{height:105px}
+ .side{gap:4px}
+ .panel{padding:4px 3px}
+ footer{gap:3px;padding-top:2px}
+ button{padding:6px 8px}
+}
 </style>
 </head>
 <body>
@@ -114,7 +149,7 @@ button:disabled{opacity:.35}
 <div class="panel"><div class="panel-title">SCORE</div><div class="score" id="score">0</div></div>
 <div class="panel"><div class="panel-title">BEST</div><div class="score" id="best" style="font-size:17px">0</div></div>
 <div class="panel"><div class="panel-title">HOLD</div><div id="holdDisplay" class="score">—</div><button id="holdBtn">HOLD</button></div>
-<div class="panel">
+<div class="panel" id="powerPanel">
 <div class="panel-title">POWER</div>
 <div class="gauge-shell" id="gaugeShell"><div id="gaugeFill"></div></div>
 <div id="chargeText">0%</div><div id="readyText">CHARGING...</div>
@@ -132,14 +167,14 @@ button:disabled{opacity:.35}
 <div class="controls">
 <button id="leftBtn">◀</button><button id="downBtn">▼</button><button id="rightBtn">▶</button><button id="blastBtn" disabled>✦ 爆発 [ENTER]</button>
 </div>
-<div class="controls"><button id="startBtn">START / RESTART</button><button id="pauseBtn">PAUSE</button></div>
+<div class="controls"><button id="startBtn">START / RESTART</button></div>
 </footer>
 <div id="bingoFX"><div class="bingo-label">BINGO!!</div></div>
 <div id="overlay"><div class="modal">
 <h2 id="overlayTitle">SUM CHAIN</h2>
 <p id="overlayText">プレイするモードを選んでね。<br>スペースキーで一気に落下。</p>
 <div class="mode-buttons" id="modeButtons"><button id="normalModeBtn">NORMAL</button><button id="challengeModeBtn">CHALLENGE</button><button id="speedModeBtn">SPEED</button><button id="superModeBtn">SUPER SPEED</button></div>
-<button id="overlayBtn" style="display:none">もう一度プレイ</button><button id="modeSelectBtn">モード選択へ</button>
+<button id="overlayBtn" style="display:none">もう一度プレイ</button><button id="modeSelectBtn" style="display:none">モード選択へ</button>
 </div></div>
 
 <script>
@@ -164,7 +199,6 @@ for(let y=0;y<H;y++)for(let x=0;x<W;x++){
 }
 const activeEl=document.createElement("div");activeEl.className="active";activeEl.style.display="none";boardEl.appendChild(activeEl);
 
-// モード別の出現確率
 function randomNumber(){
  const values=[1,2,3,4,5,6,7,8,9];
  const weights=selectedMode==="challenge"?[1,1,1,1,1,1,1,1,1]:[6,10,13,14,14,14,13,10,6];
@@ -236,8 +270,6 @@ function compactBoard(){
   for(let y=write;y>=0;y--)board[y][x]=0;
  }
 }
-
-// モードごとに許可された合計だけを消去対象にする
 function findAllMatches(){
  const matched=new Set();let biggestTarget=0;
  const allowedTargets=selectedMode==="challenge"?[10,20,30,40,50,60,70,80,90]:[10];
@@ -286,7 +318,6 @@ function playTone(freq,duration,type="sine",volume=.04,delay=0){
  }catch(e){}
 }
 function playClearSound(combo){
- // NORMAL / SPEED：連鎖の邪魔をしない、短く控えめな消去音
  const pitch=420+Math.min(combo-1,5)*45;
  playTone(pitch,.075,"sine",.018);
  playTone(pitch*1.45,.095,"sine",.012,.035);
@@ -356,7 +387,6 @@ function playJudgementSound(target){
  if(level>=6)playTone(base*2,.32,"triangle",.025,.2);
 }
 function playExplosionSound(){
- // 低音の衝撃、下降する爆風、金属的な高音を重ねた大規模爆発音
  try{
   audioCtx ||=new(window.AudioContext||window.webkitAudioContext)();
   if(audioCtx.state==="suspended")audioCtx.resume();
@@ -365,17 +395,14 @@ function playExplosionSound(){
   boom.type="sawtooth";boom.frequency.setValueAtTime(115,now);boom.frequency.exponentialRampToValueAtTime(34,now+.72);
   boomGain.gain.setValueAtTime(.0001,now);boomGain.gain.exponentialRampToValueAtTime(.22,now+.025);boomGain.gain.exponentialRampToValueAtTime(.0001,now+.85);
   boom.connect(boomGain);boomGain.connect(audioCtx.destination);boom.start(now);boom.stop(now+.88);
-
   const impact=audioCtx.createOscillator(),impactGain=audioCtx.createGain();
   impact.type="triangle";impact.frequency.setValueAtTime(520,now+.015);impact.frequency.exponentialRampToValueAtTime(62,now+.38);
   impactGain.gain.setValueAtTime(.0001,now);impactGain.gain.exponentialRampToValueAtTime(.12,now+.018);impactGain.gain.exponentialRampToValueAtTime(.0001,now+.48);
   impact.connect(impactGain);impactGain.connect(audioCtx.destination);impact.start(now);impact.stop(now+.5);
-
   const shimmer=audioCtx.createOscillator(),shimmerGain=audioCtx.createGain();
   shimmer.type="sine";shimmer.frequency.setValueAtTime(1250,now+.08);shimmer.frequency.exponentialRampToValueAtTime(240,now+.9);
   shimmerGain.gain.setValueAtTime(.0001,now);shimmerGain.gain.exponentialRampToValueAtTime(.045,now+.09);shimmerGain.gain.exponentialRampToValueAtTime(.0001,now+1.05);
   shimmer.connect(shimmerGain);shimmerGain.connect(audioCtx.destination);shimmer.start(now);shimmer.stop(now+1.08);
-
   const length=Math.floor(audioCtx.sampleRate*.65),buffer=audioCtx.createBuffer(1,length,audioCtx.sampleRate),data=buffer.getChannelData(0);
   for(let i=0;i<length;i++){const envelope=Math.pow(1-i/length,2);data[i]=(Math.random()*2-1)*envelope;}
   const noise=audioCtx.createBufferSource(),filter=audioCtx.createBiquadFilter(),noiseGain=audioCtx.createGain();
@@ -420,7 +447,6 @@ async function lockPiece(){
  spawnPiece();
 }
 function explosionShape(cx,cy){
- // 周囲12マスに加えて、中心の落下ブロックも爆発で消す
  return [[cx,cy],[cx-1,cy-1],[cx,cy-1],[cx+1,cy-1],[cx-1,cy],[cx+1,cy],
  [cx-1,cy+1],[cx,cy+1],[cx+1,cy+1],[cx,cy-2],[cx,cy+2],[cx-2,cy],[cx+2,cy]]
  .filter(([x,y])=>x>=0&&x<W&&y>=0&&y<H);
@@ -449,7 +475,6 @@ async function explode(){
  }
  boardEl.classList.remove("shake");void boardEl.offsetWidth;boardEl.classList.add("shake");
  playExplosionSound();setMessage("✦ MEGA EXPLOSION!!",1500);render();activeEl.classList.add("blast-center");await sleep(680);
- // 中心の落下ブロックも消滅。周囲の盤面ブロックと合わせて消去数に含める
  let removed=1;
  for(const [x,y] of targets){
   if(x===cx&&y===cy)continue;
@@ -466,6 +491,7 @@ async function explode(){
 }
 function startGame(mode=selectedMode){
  selectedMode=mode;
+ document.body.classList.toggle("challenge-mode",selectedMode==="challenge");
  $("subtitle").textContent=selectedMode==="challenge"?"CHALLENGE · SUM 10–90 · 3 MIN TIME ATTACK":selectedMode==="super"?"SUPER SPEED · 100MS START · KEEP ACCELERATING":selectedMode==="speed"?"SPEED · FAST START · KEEP ACCELERATING":"NORMAL · SUM 10 · CONNECT · CLEAR · CHAIN";
  renderRanking();
  $("overlay").classList.add("hidden");$("modeButtons").style.display="none";$("overlayBtn").style.display="none";$("modeSelectBtn").style.display="none";
@@ -486,25 +512,17 @@ function endGame(reason="gameover"){
  $("modeButtons").style.display="none";$("overlayBtn").style.display="inline-block";$("overlayBtn").textContent="同じモードでもう一度";
  $("modeSelectBtn").style.display="inline-block";$("overlay").classList.remove("hidden");
 }
-function togglePause(){
- if(!running||gameOver||resolving)return;
- paused=!paused;$("pauseBtn").textContent=paused?"RESUME":"PAUSE";
- setMessage(paused?"一時停止中":"再開！");
- if(!paused){lastTime=performance.now();requestAnimationFrame(loop)}
-}
 function loop(now){
  if(!running||paused||gameOver)return;
  const dt=Math.min(now-lastTime,100);lastTime=now;
- if(selectedMode==="challenge") {
+ if(selectedMode==="challenge"){
   challengeTimeLeft=Math.max(0,challengeTimeLeft-dt);updateChallengeTimer();
   if(challengeTimeLeft<=0&&!resolving){endGame("timeup");return;}
  }
  if(!resolving&&piece){
   charge=Math.min(CHARGE_MAX,charge+TIME_CHARGE_PER_SECOND*dt/1000);
   fallTimer+=dt;
-  // 50点ごとに加速。上限を設けず、終盤も同じ加速率を維持する
   if(selectedMode==="challenge"){
-   // チャレンジはスコアではなく、経過時間に応じて15秒ごとに加速する
    const elapsedTime=180000-challengeTimeLeft;
    const timeLevel=Math.floor(elapsedTime/15000);
    fallInterval=Math.max(160,750*Math.pow(.90,timeLevel));
@@ -515,21 +533,12 @@ function loop(now){
    const acceleration=isFastMode?.89:.90;
    fallInterval=baseInterval*Math.pow(acceleration,level);
   }
-  if(fallTimer>=fallInterval){
-   fallTimer=0;
-   if(canMove(piece.x,piece.y+1))piece.y++;
-  }
-
+  if(fallTimer>=fallInterval){fallTimer=0;if(canMove(piece.x,piece.y+1))piece.y++}
   const grounded=!canMove(piece.x,piece.y+1);
-  if(!grounded){
-   // 下に落ちられる状態になったら、着地時間と停止時間をリセット
-   groundedTimer=0;groundedY=-1;lockTimer=0;
-  }else{
-   // 同じ高さで着地し続けた時間。左右移動ではリセットしない
-   if(groundedY!==piece.y){groundedY=piece.y;groundedTimer=0;lockTimer=0;}
-   groundedTimer+=dt;
-   // 操作を止めている時間。左右移動すると move() 側でリセットされる
-   lockTimer+=dt;
+  if(!grounded){groundedTimer=0;groundedY=-1;lockTimer=0}
+  else{
+   if(groundedY!==piece.y){groundedY=piece.y;groundedTimer=0;lockTimer=0}
+   groundedTimer+=dt;lockTimer+=dt;
    if(groundedTimer>=MAX_GROUNDED_TIME||lockTimer>=LOCK_DELAY)lockPiece();
   }
   render();
@@ -539,8 +548,7 @@ function loop(now){
 function hardDrop(){
  if(!running||paused||resolving||!piece)return;
  while(canMove(piece.x,piece.y+1))piece.y++;
- render();
- lockPiece();
+ render();lockPiece();
 }
 function saveRanking(s,mode){
  try{
@@ -572,14 +580,13 @@ $("downBtn").addEventListener("click",()=>{
 $("holdBtn").addEventListener("click",holdPiece);
 $("blastBtn").addEventListener("click",explode);
 $("startBtn").addEventListener("click",()=>startGame(selectedMode));
-$("pauseBtn").addEventListener("click",togglePause);
 $("overlayBtn").addEventListener("click",()=>startGame(selectedMode));
 $("normalModeBtn").addEventListener("click",()=>startGame("normal"));
 $("challengeModeBtn").addEventListener("click",()=>startGame("challenge"));
 $("speedModeBtn").addEventListener("click",()=>startGame("speed"));
 $("superModeBtn").addEventListener("click",()=>startGame("super"));
 $("modeSelectBtn").addEventListener("click",()=>{
- running=false;paused=false;piece=null;selectedMode="normal";
+ running=false;paused=false;piece=null;selectedMode="normal";document.body.classList.remove("challenge-mode");
  $("overlayTitle").textContent="SUM CHAIN";
  $("overlayText").innerHTML="プレイするモードを選んでね。<br>スペースキーで一気に落下。";
  $("modeButtons").style.display="flex";$("overlayBtn").style.display="none";$("modeSelectBtn").style.display="none";
@@ -597,7 +604,6 @@ document.addEventListener("keydown",e=>{
  }else if(e.key==="c"||e.key==="C"||e.key==="Shift"||e.key==="ArrowUp")holdPiece();
  else if(e.key==="Enter"){if(running&&!paused&&charge>=CHARGE_MAX)explode()}
  else if(e.code==="Space"){hardDrop()}
- else if(e.key==="Escape"||e.key==="p"||e.key==="P")togglePause();
 });
 for(const [id,dx] of [["leftBtn",-1],["rightBtn",1]]){
  let repeatId;const btn=$(id);
