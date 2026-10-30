@@ -10,6 +10,22 @@
 *{box-sizing:border-box}
 body{margin:0;height:100dvh;overflow:hidden;color:#f3f6ff;background:radial-gradient(ellipse at 50% 30%,#24314d,#101522 70%);font-family:system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;user-select:none}
 header{width:100%;text-align:center;padding:8px 0 4px;flex-shrink:0}
+#challengeTracker{display:none;width:min(520px,94vw);margin:2px auto 4px;padding:6px 8px;border:1px solid #66502d;border-radius:10px;background:#211d20;flex-shrink:0}
+#challengeTracker.visible{display:block}
+.tracker-title{font-size:9px;letter-spacing:2px;color:#d9bd83;text-align:center;margin-bottom:5px;font-weight:900}
+.tracker-items{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:4px}
+.tracker-item{border:1px solid #3d3a3c;border-radius:6px;background:#11151e;color:#555d6c;text-align:center;padding:3px 0;font-size:clamp(11px,2.8vw,15px);font-weight:950;text-shadow:none;transition:all .25s}
+.tracker-item.lit{color:#fff3a5;border-color:#ffd166;background:linear-gradient(145deg,#795323,#33291d);box-shadow:0 0 9px #ffc44d88, inset 0 0 8px #ffe7a044;text-shadow:0 0 8px #ffe27a}
+.tracker-item.reach{animation:trackerReach .65s ease-in-out infinite alternate}
+.tracker-item.bingo{animation:trackerBingo .45s ease-in-out 3}
+@keyframes trackerReach{to{transform:translateY(-3px) scale(1.07);box-shadow:0 0 18px #ffdc66;border-color:#fff4b0}}
+@keyframes trackerBingo{50%{transform:scale(1.18);filter:brightness(2)}}
+#bingoFX{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0}
+#bingoFX.show{animation:bingoScreen 1.9s ease-out forwards}
+#bingoFX .bingo-label{font-size:clamp(48px,14vw,100px);font-weight:1000;font-style:italic;letter-spacing:4px;color:#fff5a5;-webkit-text-stroke:2px #b66a12;text-shadow:0 0 18px #fff,0 0 42px #ffb52e,0 8px 0 #8a3b16;transform:scale(.25) rotate(-12deg)}
+#bingoFX.show .bingo-label{animation:bingoPop 1.6s cubic-bezier(.15,.8,.2,1) forwards}
+@keyframes bingoScreen{0%{opacity:0;background:transparent}12%{opacity:1;background:#fff5b955}28%{opacity:1;background:#ffb52e55}65%{opacity:1;background:#16101b66}100%{opacity:0;background:transparent}}
+@keyframes bingoPop{0%{transform:scale(.2) rotate(-12deg)}22%{transform:scale(1.18) rotate(4deg)}38%{transform:scale(1) rotate(0)}75%{transform:scale(1.06)}100%{transform:scale(.9) translateY(-25px)}}
 h1{font-size:clamp(18px,4vw,28px);margin:0;letter-spacing:3px;color:var(--cyan);text-shadow:0 0 16px #50e7ff55}
 .subtitle{font-size:10px;color:#9eabc5;letter-spacing:2px}
 main{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;gap:clamp(7px,2vw,20px);width:100%;padding:5px}
@@ -18,7 +34,7 @@ main{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
 .panel-title{font-size:10px;letter-spacing:1px;color:#a9b7d3;margin-bottom:4px}
 .score{font-size:clamp(16px,4vw,23px);font-weight:800}
 .small{font-size:10px;color:#a9b7d3}
-#board{position:relative;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(10,1fr);gap:3px;height:min(68dvh,650px);width:min(42vw,300px,calc(68dvh * .43));aspect-ratio:4/10;padding:4px;flex-shrink:0;background:#080d18;border:2px solid #53627e;border-radius:9px;box-shadow:0 0 28px #0008,inset 0 0 20px #0008;overflow:visible}
+#board{position:relative;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(10,1fr);gap:3px;height:min(62dvh,620px);width:min(42vw,300px,calc(62dvh * .43));aspect-ratio:4/10;padding:4px;flex-shrink:0;background:#080d18;border:2px solid #53627e;border-radius:9px;box-shadow:0 0 28px #0008,inset 0 0 20px #0008;overflow:visible}
 .cell{min-width:0;min-height:0;border-radius:4px;background:#1b2538;border:1px solid #29364d;display:flex;align-items:center;justify-content:center;font-size:clamp(12px,3.5vw,23px);font-weight:900;position:relative}
 .n1{background:#216a91;color:white}.n2{background:#287fba;color:white}.n3{background:#267fa0;color:white}.n4{background:#367b73;color:white}.n5{background:#588348;color:white}.n6{background:#9b9239;color:white}.n7{background:#b77932;color:white}.n8{background:#b45b48;color:white}.n9{background:#a94a6c;color:white}
 .active{position:absolute;z-index:5;display:flex;align-items:center;justify-content:center;border-radius:5px;border:2px solid #ffffffd9;font-size:clamp(12px,3.5vw,23px);font-weight:950;color:white;box-shadow:0 0 14px #ffffff55;pointer-events:none;transition:top .04s linear,left .04s linear}
@@ -83,7 +99,7 @@ button:disabled{opacity:.35}
 .modal{width:min(330px,100%);border:1px solid #4a5d7b;border-radius:16px;background:#182236;padding:22px;text-align:center}
 .modal h2{margin:0 0 10px;color:var(--cyan)}
 .modal p{font-size:13px;line-height:1.8;color:#c0cce0}
-@media(max-height:600px){header{padding:3px 0}.subtitle{display:none}#board{height:65dvh;width:min(38vw,calc(65dvh * .43))}.gauge-shell{height:105px}.side{gap:4px}.panel{padding:4px 3px}footer{gap:3px;padding-top:2px}button{padding:6px 8px}}
+@media(max-height:600px){header{padding:3px 0}.subtitle{display:none}#challengeTracker{padding:3px 6px;margin:0 auto 2px}.tracker-title{margin-bottom:2px}#board{height:58dvh;width:min(38vw,calc(58dvh * .43))}.gauge-shell{height:105px}.side{gap:4px}.panel{padding:4px 3px}footer{gap:3px;padding-top:2px}button{padding:6px 8px}}
 </style>
 </head>
 <body>
@@ -91,6 +107,7 @@ button:disabled{opacity:.35}
 <h1>SUM 10 <span style="color:white">CHAIN</span></h1>
 <div class="subtitle" id="subtitle">CONNECT · CLEAR · CHAIN · EXPLODE</div>
 </header>
+<div id="challengeTracker"><div class="tracker-title">CHALLENGE BINGO · MAKE ALL 9</div><div class="tracker-items" id="challengeTrackerItems"></div></div>
 <main>
 <aside class="side">
 <div class="panel" id="timerPanel" style="display:none"><div class="panel-title">TIME</div><div id="timerValue">03:00</div></div>
@@ -117,6 +134,7 @@ button:disabled{opacity:.35}
 </div>
 <div class="controls"><button id="startBtn">START / RESTART</button><button id="pauseBtn">PAUSE</button></div>
 </footer>
+<div id="bingoFX"><div class="bingo-label">BINGO!!</div></div>
 <div id="overlay"><div class="modal">
 <h2 id="overlayTitle">SUM CHAIN</h2>
 <p id="overlayText">プレイするモードを選んでね。<br>スペースキーで一気に落下。</p>
@@ -133,6 +151,8 @@ let piece=null,hold=null,holdUsed=false,queue=[],score=0,best=0;
 let selectedMode="normal";
 let running=false,paused=false,gameOver=false,resolving=false;
 let challengeTimeLeft=180000;
+const challengeCompletedTargets=new Set();
+const CHALLENGE_BINGO_BONUS=1000000;
 let lockTimer=0,groundedTimer=0,groundedY=-1,lastTime=0,fallTimer=0,fallInterval=750,charge=0,maxCombo=0;
 let messageTimer=null,blastCells=new Set(),clearCells=new Set(),audioCtx=null;
 const CHARGE_MAX=100,LOCK_DELAY=600,MAX_GROUNDED_TIME=3000,TIME_CHARGE_PER_SECOND=.02;
@@ -273,6 +293,41 @@ function playClearSound(combo){
 }
 const JUDGEMENTS={20:"Nice",30:"Great",40:"Excellent",50:"Amazing",60:"Wonderful",70:"Fantastic",80:"Perfect",90:"Perfect!!"};
 const CHALLENGE_POINTS={10:10,20:40,30:160,40:640,50:2560,60:10240,70:40960,80:163840,90:655360};
+function renderChallengeTracker(){
+ const wrap=$("challengeTracker"),items=$("challengeTrackerItems");
+ wrap.classList.toggle("visible",selectedMode==="challenge");
+ items.innerHTML="";
+ for(let target=10;target<=90;target+=10){
+  const item=document.createElement("div");item.className="tracker-item";
+  if(challengeCompletedTargets.has(target))item.classList.add("lit");
+  if(challengeCompletedTargets.size===8&&!challengeCompletedTargets.has(target))item.classList.add("reach");
+  item.textContent=target;items.appendChild(item);
+ }
+}
+function showBingo(){
+ const fx=$("bingoFX");fx.classList.remove("show");void fx.offsetWidth;fx.classList.add("show");
+ const items=[...$("challengeTrackerItems").children];items.forEach(el=>el.classList.add("bingo"));
+ playExplosionSound();playTone(880,.28,"triangle",.07,.12);playTone(1175,.35,"sine",.06,.28);
+ setTimeout(()=>setMessage(`★★ BINGO!! +${CHALLENGE_BINGO_BONUS.toLocaleString()} POINTS! ★★`,2200),350);
+ setTimeout(()=>{fx.classList.remove("show");items.forEach(el=>el.classList.remove("bingo"));},2000);
+}
+function registerChallengeTarget(target){
+ if(selectedMode!=="challenge"||target<10||target>90||target%10!==0||challengeCompletedTargets.has(target))return;
+ challengeCompletedTargets.add(target);
+ renderChallengeTracker();
+ const count=challengeCompletedTargets.size;
+ if(count===8){
+  setTimeout(()=>setMessage("BINGOリーチ！ あと1種類！",2200),350);
+  playTone(660,.18,"triangle",.07);playTone(880,.22,"triangle",.06,.12);
+ }else if(count===9){
+  score+=CHALLENGE_BINGO_BONUS;
+  render();showBingo();
+  challengeCompletedTargets.clear();
+  setTimeout(()=>renderChallengeTracker(),2100);
+ }else{
+  setMessage(`${target}を達成！ BINGO ${count}/9`,1200);
+ }
+}
 function updateChallengeTimer(){
  const el=$("timerValue");
  const seconds=Math.max(0,Math.ceil(challengeTimeLeft/1000));
@@ -343,7 +398,7 @@ async function resolveClears(){
    await sleep(CLEAR_ANIMATION);
    let clearedValue=0;for(const [x,y] of group){clearedValue+=board[y][x];board[y][x]=0}
    clearCells.clear();totalCleared+=group.length;
-   if(selectedMode==="challenge")score+=(CHALLENGE_POINTS[match.target]||10)*combo;
+   if(selectedMode==="challenge"){score+=(CHALLENGE_POINTS[match.target]||10)*combo;registerChallengeTarget(match.target);}
    else score+=group.length*10*combo;
    addCharge(combo);
    compactBoard();render();await sleep(FALL_ANIMATION);
@@ -415,14 +470,14 @@ function startGame(mode=selectedMode){
  renderRanking();
  $("overlay").classList.add("hidden");$("modeButtons").style.display="none";$("overlayBtn").style.display="none";$("modeSelectBtn").style.display="none";
  init();running=true;paused=false;gameOver=false;
- challengeTimeLeft=180000;$("timerPanel").style.display=selectedMode==="challenge"?"block":"none";updateChallengeTimer();
+ challengeTimeLeft=180000;challengeCompletedTargets.clear();renderChallengeTracker();$("timerPanel").style.display=selectedMode==="challenge"?"block":"none";updateChallengeTimer();
  lastTime=performance.now();spawnPiece();setMessage("ゲーム開始！");requestAnimationFrame(loop);
 }
 function init(){
  for(let y=0;y<H;y++)board[y].fill(0);
  piece=null;hold=null;holdUsed=false;queue=[];score=0;charge=0;maxCombo=0;
  fallTimer=0;lockTimer=0;groundedTimer=0;groundedY=-1;fallInterval=750;resolving=false;
- clearCells.clear();blastCells.clear();gameOver=false;$("chainDisplay").textContent="0";render();
+ clearCells.clear();blastCells.clear();challengeCompletedTargets.clear();renderChallengeTracker();gameOver=false;$("chainDisplay").textContent="0";render();
 }
 function endGame(reason="gameover"){
  running=false;paused=false;gameOver=true;piece=null;best=Math.max(best,score);saveRanking(score,selectedMode);render();
@@ -447,6 +502,7 @@ function loop(now){
  if(!resolving&&piece){
   charge=Math.min(CHARGE_MAX,charge+TIME_CHARGE_PER_SECOND*dt/1000);
   fallTimer+=dt;
+  // 50点ごとに加速。上限を設けず、終盤も同じ加速率を維持する
   if(selectedMode==="challenge"){
    // チャレンジはスコアではなく、経過時間に応じて15秒ごとに加速する
    const elapsedTime=180000-challengeTimeLeft;
@@ -463,12 +519,17 @@ function loop(now){
    fallTimer=0;
    if(canMove(piece.x,piece.y+1))piece.y++;
   }
+
   const grounded=!canMove(piece.x,piece.y+1);
   if(!grounded){
+   // 下に落ちられる状態になったら、着地時間と停止時間をリセット
    groundedTimer=0;groundedY=-1;lockTimer=0;
   }else{
+   // 同じ高さで着地し続けた時間。左右移動ではリセットしない
    if(groundedY!==piece.y){groundedY=piece.y;groundedTimer=0;lockTimer=0;}
-   groundedTimer+=dt;lockTimer+=dt;
+   groundedTimer+=dt;
+   // 操作を止めている時間。左右移動すると move() 側でリセットされる
+   lockTimer+=dt;
    if(groundedTimer>=MAX_GROUNDED_TIME||lockTimer>=LOCK_DELAY)lockPiece();
   }
   render();
