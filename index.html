@@ -451,15 +451,16 @@ $("modeSelectBtn").addEventListener("click",()=>{
  $("overlay").classList.remove("hidden");render();
 });
 document.addEventListener("keydown",e=>{
- if(["ArrowLeft","ArrowRight","ArrowDown","Enter"," "].includes(e.key))e.preventDefault();
- if(e.repeat&&["Enter"," ","c","C"].includes(e.key))return;
+ if(["ArrowLeft","ArrowRight","ArrowDown","ArrowUp","Enter"," "].includes(e.key))e.preventDefault();
+ if(e.repeat&&["Enter"," ","c","C","ArrowUp"].includes(e.key))return;
+
  if(e.key==="ArrowLeft"||e.key==="a"||e.key==="A")move(-1,0);
  else if(e.key==="ArrowRight"||e.key==="d"||e.key==="D")move(1,0);
  else if(e.key==="ArrowDown"||e.key==="s"||e.key==="S"){
   if(running&&!paused&&!resolving&&piece&&canMove(piece.x,piece.y+1)){
    piece.y++;lockTimer=0;fallTimer=0;render();
   }
- }else if(e.key==="c"||e.key==="C"||e.key==="Shift")holdPiece();
+ }else if(e.key==="c"||e.key==="C"||e.key==="Shift"||e.key==="ArrowUp")holdPiece();
  else if(e.key==="Enter"){if(running&&!paused&&charge>=CHARGE_MAX)explode()}
  else if(e.code==="Space"){hardDrop()}
  else if(e.key==="Escape"||e.key==="p"||e.key==="P")togglePause();
