@@ -47,7 +47,9 @@ main{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
 #board.shake{animation:shake .28s linear}
 @keyframes shake{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
 .cell.clearing{animation:clearCell .28s ease-out forwards}
+.cell.clearing.soft-clear{animation:softClearCell .28s ease-out forwards}
 @keyframes clearCell{45%{filter:brightness(3);transform:scale(1.12)}100%{opacity:0;transform:scale(.1)}}
+@keyframes softClearCell{0%{filter:brightness(1);transform:scale(1)}28%{background:#fff;color:#fff;filter:brightness(1.8);box-shadow:0 0 9px #fff9;transform:scale(1.035)}100%{opacity:0;transform:scale(.82)}}
 .cell.blast{animation:blastCell .42s ease-out forwards}
 @keyframes blastCell{30%{filter:brightness(4) saturate(0);background:white;transform:scale(1.08)}100%{filter:brightness(1.6)}}
 #explosionFX{position:absolute;inset:0;z-index:10;pointer-events:none}
@@ -149,7 +151,7 @@ function render(){
   const el=cells[y*W+x],v=board[y][x],key=`${x},${y}`;
   el.className="cell";el.textContent=v||"";
   if(v)el.classList.add("n"+v);
-  if(clearCells.has(key))el.classList.add("clearing");
+  if(clearCells.has(key)){el.classList.add("clearing");if(selectedMode!=="challenge")el.classList.add("soft-clear");}
   if(blastCells.has(key))el.classList.add("blast");
  }
  if(piece&&!gameOver){
@@ -248,8 +250,10 @@ function playTone(freq,duration,type="sine",volume=.04,delay=0){
  }catch(e){}
 }
 function playClearSound(combo){
- playTone(450+combo*110,.12,"triangle",.035);
- playTone(700+combo*150,.16,"sine",.025,.06);
+ // NORMAL / SPEED：連鎖の邪魔をしない、短く控えめな消去音
+ const pitch=420+Math.min(combo-1,5)*45;
+ playTone(pitch,.075,"sine",.018);
+ playTone(pitch*1.45,.095,"sine",.012,.035);
 }
 const JUDGEMENTS={10:"Good",30:"Great",50:"Excellent",70:"Wonderful",90:"Perfect"};
 function showJudgement(target){
@@ -364,9 +368,9 @@ function loop(now){
  if(!resolving&&piece){
   charge=Math.min(CHARGE_MAX,charge+TIME_CHARGE_PER_SECOND*dt/1000);
   fallTimer+=dt;
-  // 50点ごとに加速。速度の上限は設けず、終盤も同じ加速率を維持する
+  // 50点ごとに加速。上限を設けず、終盤も同じ加速率を維持する
   const level=Math.floor(score/50);
-  const baseInterval=selectedMode==="speed"?500:750;
+  const baseInterval=selectedMode==="speed"?300:750;
   const acceleration=selectedMode==="speed"?.89:.90;
   fallInterval=baseInterval*Math.pow(acceleration,level);
   if(fallTimer>=fallInterval){
