@@ -199,11 +199,14 @@ function compactBoard(){
  }
 }
 
-// 合計10〜90の成立箇所をすべて検出
+// モードに応じた合計値の成立箇所を検出
 function findAllMatches(){
  const matched=new Set();let biggestTarget=0;
  const addSegment=(coords,sum)=>{
-  if(coords.length<2||sum<10||sum>90||sum%10!==0)return;
+  const valid=selectedMode==="normal"
+   ? sum===10
+   : sum>=10&&sum<=90&&sum%10===0;
+  if(coords.length<2||!valid)return;
   biggestTarget=Math.max(biggestTarget,sum);
   for(const [x,y] of coords)matched.add(`${x},${y}`);
  };
@@ -250,10 +253,20 @@ function playClearSound(combo){
  playTone(450+combo*110,.12,"triangle",.035);
  playTone(700+combo*150,.16,"sine",.025,.06);
 }
-const JUDGEMENTS={30:"Great",50:"Excellent",70:"Wonderful",90:"Perfect"};
+
+// 判定は10・30・50・70・90の5種類だけ
+const JUDGEMENTS={
+ 10:"GOOD",
+ 30:"GREAT",
+ 50:"EXCELLENT",
+ 70:"WONDERFUL",
+ 90:"PERFECT"
+};
 function showJudgement(target){
- if(target<20)return;
- const el=$("judgement");el.innerHTML=`<span class="judge-number">${target}</span><span class="judge-word">${JUDGEMENTS[target]||"Perfect"}</span>`;
+ const word=JUDGEMENTS[target];
+ if(!word)return;
+ const el=$("judgement");
+ el.innerHTML=`<span class="judge-number">${target}</span><span class="judge-word">${word}</span>`;
  el.classList.remove("show");void el.offsetWidth;el.classList.add("show");
 }
 function playJudgementSound(target){
@@ -276,8 +289,9 @@ async function resolveClears(){
    const match=findAllMatches(),group=match.cells;if(group.length===0)break;
    combo++;maxCombo=Math.max(maxCombo,combo);$("chainDisplay").textContent=maxCombo;
    clearAnimation(group);if(combo>=2)showCombo(combo);
-   if(selectedMode==="challenge"&&match.target>=20){showJudgement(match.target);playJudgementSound(match.target)}
-   else playClearSound(combo);
+   if(selectedMode==="challenge"&&JUDGEMENTS[match.target]){
+    showJudgement(match.target);playJudgementSound(match.target);
+   }else playClearSound(combo);
    await sleep(CLEAR_ANIMATION);
    let clearedValue=0;for(const [x,y] of group){clearedValue+=board[y][x];board[y][x]=0}
    clearCells.clear();totalCleared+=group.length;
@@ -401,6 +415,7 @@ function renderRanking(){
   const li=document.createElement("li");li.textContent=s.toLocaleString();$("rankList").appendChild(li);
  });
 }
+
 $("leftBtn").addEventListener("click",()=>move(-1,0));
 $("rightBtn").addEventListener("click",()=>move(1,0));
 $("downBtn").addEventListener("click",()=>{
