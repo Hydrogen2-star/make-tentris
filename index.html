@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -120,9 +119,9 @@ const boardEl=$("board"),cells=[],board=Array.from({length:H},()=>Array(W).fill(
 let piece=null,hold=null,holdUsed=false,queue=[],score=0,best=0;
 let selectedMode="normal";
 let running=false,paused=false,gameOver=false,resolving=false;
-let lockTimer=0,lastTime=0,fallTimer=0,fallInterval=750,charge=0,maxCombo=0;
+let lockTimer=0,groundedTimer=0,groundedY=-1,lastTime=0,fallTimer=0,fallInterval=750,charge=0,maxCombo=0;
 let messageTimer=null,blastCells=new Set(),clearCells=new Set(),audioCtx=null;
-const CHARGE_MAX=100,LOCK_DELAY=5000,TIME_CHARGE_PER_SECOND=.02;
+const CHARGE_MAX=100,LOCK_DELAY=600,MAX_GROUNDED_TIME=3000,TIME_CHARGE_PER_SECOND=.02;
 const CLEAR_ANIMATION=280,FALL_ANIMATION=230;
 
 for(let y=0;y<H;y++)for(let x=0;x<W;x++){
@@ -142,7 +141,7 @@ function randomNumber(){
 function ensureQueue(){while(queue.length<3)queue.push(randomNumber())}
 function spawnPiece(){
  ensureQueue();piece={x:1,y:0,value:queue.shift()};ensureQueue();
- holdUsed=false;lockTimer=0;fallTimer=0;
+ holdUsed=false;lockTimer=0;groundedTimer=0;groundedY=-1;fallTimer=0;
  if(board[0][piece.x]!==0){
   const x=[0,1,2,3].find(x=>board[0][x]===0);
   if(x!==undefined)piece.x=x;else{endGame();return}
@@ -185,10 +184,7 @@ function canMove(x,y){return x>=0&&x<W&&y>=0&&y<H&&board[y][x]===0}
 function move(dx,dy){
  if(!running||paused||resolving||!piece)return;
  const nx=piece.x+dx,ny=piece.y+dy;
- if(canMove(nx,ny)){
-  if(ny!==piece.y)lockTimer=0;
-  piece.x=nx;piece.y=ny;fallTimer=0;render();
- }
+ if(canMove(nx,ny)){piece.x=nx;piece.y=ny;lockTimer=0;fallTimer=0;render()}
  else if(dy===1)lockTimer=Math.max(lockTimer,1);
 }
 function holdPiece(){
@@ -256,7 +252,6 @@ function playTone(freq,duration,type="sine",volume=.04,delay=0){
  }catch(e){}
 }
 function playClearSound(combo){
- // NORMAL / SPEED：連鎖の邪魔をしない、短く控えめな消去音
  const pitch=420+Math.min(combo-1,5)*45;
  playTone(pitch,.075,"sine",.018);
  playTone(pitch*1.45,.095,"sine",.012,.035);
@@ -265,7 +260,7 @@ const JUDGEMENTS={10:"Good",30:"Great",50:"Excellent",70:"Wonderful",90:"Perfect
 function showJudgement(target){
  const word=JUDGEMENTS[target];
  if(!word)return;
- const el=$("judgement");el.innerHTML=`<span class="judge-number">${target}</span><span class="judge-word">${word}</span>`;
+ const el=$("judgement");el.classList.remove("make-ten");el.innerHTML=`<span class="judge-number">${target}</span><span class="judge-word">${word}</span>`;
  el.classList.remove("show");void el.offsetWidth;el.classList.add("show");
 }
 function showMakeTen(){
@@ -296,10 +291,7 @@ async function resolveClears(){
    combo++;maxCombo=Math.max(maxCombo,combo);$("chainDisplay").textContent=maxCombo;
    clearAnimation(group);if(combo>=2)showCombo(combo);
    if(selectedMode==="challenge"&&JUDGEMENTS[match.target]){showJudgement(match.target);playJudgementSound(match.target)}
-   else{
-    if(match.target===10)showMakeTen();
-    playClearSound(combo);
-   }
+   else{if(match.target===10)showMakeTen();playClearSound(combo)}
    await sleep(CLEAR_ANIMATION);
    let clearedValue=0;for(const [x,y] of group){clearedValue+=board[y][x];board[y][x]=0}
    clearCells.clear();totalCleared+=group.length;
@@ -318,7 +310,7 @@ async function lockPiece(){
  if(!piece||resolving||!running||paused)return;
  const {x,y,value}=piece;
  if(y<0||board[y][x]!==0){endGame();return}
- board[y][x]=value;piece=null;lockTimer=0;render();
+ board[y][x]=value;piece=null;lockTimer=0;groundedTimer=0;groundedY=-1;render();
  await resolveClears();
  if(!running||gameOver)return;
  if(board[0].some(v=>v!==0)){endGame();return}
@@ -362,7 +354,7 @@ function startGame(mode=selectedMode){
 function init(){
  for(let y=0;y<H;y++)board[y].fill(0);
  piece=null;hold=null;holdUsed=false;queue=[];score=0;charge=0;maxCombo=0;
- fallTimer=0;lockTimer=0;fallInterval=750;resolving=false;
+ fallTimer=0;lockTimer=0;groundedTimer=0;groundedY=-1;fallInterval=750;resolving=false;
  clearCells.clear();blastCells.clear();gameOver=false;$("chainDisplay").textContent="0";render();
 }
 function endGame(){
@@ -392,11 +384,21 @@ function loop(now){
   fallInterval=baseInterval*Math.pow(acceleration,level);
   if(fallTimer>=fallInterval){
    fallTimer=0;
-   if(canMove(piece.x,piece.y+1)){piece.y++;lockTimer=0}
-   else{lockTimer+=dt;if(lockTimer>=LOCK_DELAY)lockPiece()}
-  }else if(!canMove(piece.x,piece.y+1)){
-   lockTimer+=dt;if(lockTimer>=LOCK_DELAY)lockPiece();
-  }else lockTimer=0;
+   if(canMove(piece.x,piece.y+1))piece.y++;
+  }
+
+  const grounded=!canMove(piece.x,piece.y+1);
+  if(!grounded){
+   // 下に落ちられる状態になったら、着地時間と停止時間をリセット
+   groundedTimer=0;groundedY=-1;lockTimer=0;
+  }else{
+   // 同じ高さで着地し続けた時間。左右移動ではリセットしない
+   if(groundedY!==piece.y){groundedY=piece.y;groundedTimer=0;lockTimer=0;}
+   groundedTimer+=dt;
+   // 操作を止めている時間。左右移動すると move() 側でリセットされる
+   lockTimer+=dt;
+   if(groundedTimer>=MAX_GROUNDED_TIME||lockTimer>=LOCK_DELAY)lockPiece();
+  }
   render();
  }
  requestAnimationFrame(loop);
@@ -453,7 +455,6 @@ $("modeSelectBtn").addEventListener("click",()=>{
 document.addEventListener("keydown",e=>{
  if(["ArrowLeft","ArrowRight","ArrowDown","ArrowUp","Enter"," "].includes(e.key))e.preventDefault();
  if(e.repeat&&["Enter"," ","c","C","ArrowUp"].includes(e.key))return;
-
  if(e.key==="ArrowLeft"||e.key==="a"||e.key==="A")move(-1,0);
  else if(e.key==="ArrowRight"||e.key==="d"||e.key==="D")move(1,0);
  else if(e.key==="ArrowDown"||e.key==="s"||e.key==="S"){
