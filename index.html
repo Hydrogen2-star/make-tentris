@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -46,8 +47,8 @@ main{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
 #superModeBtn{border-color:#c58bff;color:#d8b5ff}
 #modeSelectBtn{display:none;margin-top:8px}
 @keyframes comboPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(-9deg)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.2) rotate(3deg)}38%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-80%) scale(.9)}}
-#board.shake{animation:shake .28s linear}
-@keyframes shake{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+#board.shake{animation:shake .78s cubic-bezier(.25,.7,.3,1)}
+@keyframes shake{0%,100%{transform:translate(0,0) rotate(0)}10%{transform:translate(-7px,3px) rotate(-1deg)}20%{transform:translate(8px,-4px) rotate(1deg)}32%{transform:translate(-6px,2px) rotate(-.7deg)}45%{transform:translate(5px,-2px) rotate(.5deg)}60%{transform:translate(-3px,1px)}75%{transform:translate(2px,-1px)}}
 .cell.clearing{animation:clearCell .28s ease-out forwards}
 .cell.clearing.soft-clear{animation:softClearCell .28s ease-out forwards}
 @keyframes clearCell{45%{filter:brightness(3);transform:scale(1.12)}100%{opacity:0;transform:scale(.1)}}
@@ -55,8 +56,15 @@ main{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
 .cell.blast{animation:blastCell .42s ease-out forwards}
 @keyframes blastCell{30%{filter:brightness(4) saturate(0);background:white;transform:scale(1.08)}100%{filter:brightness(1.6)}}
 #explosionFX{position:absolute;inset:0;z-index:10;pointer-events:none}
-.blast-ring{position:absolute;width:20px;height:20px;border:4px solid #fff6a1;border-radius:50%;box-shadow:0 0 20px #ff9d35;transform:translate(-50%,-50%) scale(.2);animation:ring .48s ease-out forwards}
-@keyframes ring{to{transform:translate(-50%,-50%) scale(8);opacity:0}}
+.blast-ring{position:absolute;width:22px;height:22px;border:4px solid #fffbd0;border-radius:50%;box-shadow:0 0 24px #fff,0 0 48px #ff9d35;transform:translate(-50%,-50%) scale(.2);animation:ring .78s cubic-bezier(.12,.65,.25,1) forwards}
+.blast-ring.outer{border-width:5px;border-color:#ffb347;box-shadow:0 0 18px #ff8c22,0 0 42px #ff5e24;animation-duration:1s}
+.blast-ring.inner{border-width:3px;border-color:#e9fcff;animation-duration:.55s}
+.blast-flash{position:absolute;inset:0;background:radial-gradient(circle at var(--cx) var(--cy),#fff 0%,#fffde0 8%,#ffbd55 20%,#ff6b2c55 42%,transparent 72%);opacity:0;animation:blastFlash .72s ease-out forwards}
+@keyframes blastFlash{0%{opacity:0}12%{opacity:1}35%{opacity:.78}100%{opacity:0}}
+.blast-particle{position:absolute;left:var(--x);top:var(--y);width:var(--size);height:var(--size);border-radius:50%;background:var(--color);box-shadow:0 0 8px var(--color),0 0 18px var(--color);animation:blastParticle .8s cubic-bezier(.1,.65,.2,1) forwards}
+@keyframes blastParticle{0%{opacity:1;transform:translate(-50%,-50%) scale(1.5)}75%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.08)}}
+.active.blast-center{animation:centerVanish .62s ease-out forwards;z-index:12}
+@keyframes centerVanish{0%{filter:brightness(1);transform:scale(1)}18%{filter:brightness(5);box-shadow:0 0 18px #fff,0 0 45px #ffb52e;transform:scale(1.35)}55%{filter:brightness(3);transform:scale(1.7) rotate(20deg)}100%{opacity:0;filter:brightness(3);transform:scale(.05) rotate(90deg)}}
 footer{flex-shrink:0;width:100%;padding:4px 8px max(6px,env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:5px}
 .controls{display:flex;gap:6px;justify-content:center;width:100%}
 button{border:1px solid #465570;border-radius:9px;background:#202c42;color:white;font-size:12px;font-weight:800;padding:8px 10px;min-width:44px;cursor:pointer;touch-action:manipulation}
@@ -278,8 +286,33 @@ function playJudgementSound(target){
  if(level>=6)playTone(base*2,.32,"triangle",.025,.2);
 }
 function playExplosionSound(){
- playTone(100,.45,"sawtooth",.09);playTone(260,.35,"triangle",.06,.03);
- playTone(680,.22,"square",.025,.08);
+ // 低音の衝撃、下降する爆風、金属的な高音を重ねた大規模爆発音
+ try{
+  audioCtx ||=new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==="suspended")audioCtx.resume();
+  const now=audioCtx.currentTime;
+  const boom=audioCtx.createOscillator(),boomGain=audioCtx.createGain();
+  boom.type="sawtooth";boom.frequency.setValueAtTime(115,now);boom.frequency.exponentialRampToValueAtTime(34,now+.72);
+  boomGain.gain.setValueAtTime(.0001,now);boomGain.gain.exponentialRampToValueAtTime(.22,now+.025);boomGain.gain.exponentialRampToValueAtTime(.0001,now+.85);
+  boom.connect(boomGain);boomGain.connect(audioCtx.destination);boom.start(now);boom.stop(now+.88);
+
+  const impact=audioCtx.createOscillator(),impactGain=audioCtx.createGain();
+  impact.type="triangle";impact.frequency.setValueAtTime(520,now+.015);impact.frequency.exponentialRampToValueAtTime(62,now+.38);
+  impactGain.gain.setValueAtTime(.0001,now);impactGain.gain.exponentialRampToValueAtTime(.12,now+.018);impactGain.gain.exponentialRampToValueAtTime(.0001,now+.48);
+  impact.connect(impactGain);impactGain.connect(audioCtx.destination);impact.start(now);impact.stop(now+.5);
+
+  const shimmer=audioCtx.createOscillator(),shimmerGain=audioCtx.createGain();
+  shimmer.type="sine";shimmer.frequency.setValueAtTime(1250,now+.08);shimmer.frequency.exponentialRampToValueAtTime(240,now+.9);
+  shimmerGain.gain.setValueAtTime(.0001,now);shimmerGain.gain.exponentialRampToValueAtTime(.045,now+.09);shimmerGain.gain.exponentialRampToValueAtTime(.0001,now+1.05);
+  shimmer.connect(shimmerGain);shimmerGain.connect(audioCtx.destination);shimmer.start(now);shimmer.stop(now+1.08);
+
+  const length=Math.floor(audioCtx.sampleRate*.65),buffer=audioCtx.createBuffer(1,length,audioCtx.sampleRate),data=buffer.getChannelData(0);
+  for(let i=0;i<length;i++){const envelope=Math.pow(1-i/length,2);data[i]=(Math.random()*2-1)*envelope;}
+  const noise=audioCtx.createBufferSource(),filter=audioCtx.createBiquadFilter(),noiseGain=audioCtx.createGain();
+  noise.buffer=buffer;filter.type="lowpass";filter.frequency.setValueAtTime(3200,now);filter.frequency.exponentialRampToValueAtTime(280,now+.62);
+  noiseGain.gain.setValueAtTime(.0001,now);noiseGain.gain.exponentialRampToValueAtTime(.16,now+.012);noiseGain.gain.exponentialRampToValueAtTime(.0001,now+.66);
+  noise.connect(filter);filter.connect(noiseGain);noiseGain.connect(audioCtx.destination);noise.start(now);noise.stop(now+.67);
+ }catch(e){playTone(85,.7,"sawtooth",.12);playTone(520,.25,"triangle",.06,.02);playTone(950,.4,"sine",.035,.12)}
 }
 function clearAnimation(group){clearCells=new Set(group.map(([x,y])=>`${x},${y}`));render()}
 async function resolveClears(){
@@ -291,7 +324,7 @@ async function resolveClears(){
    combo++;maxCombo=Math.max(maxCombo,combo);$("chainDisplay").textContent=maxCombo;
    clearAnimation(group);if(combo>=2)showCombo(combo);
    if(selectedMode==="challenge"&&JUDGEMENTS[match.target]){showJudgement(match.target);playJudgementSound(match.target)}
-   else{if(match.target===10)showMakeTen();playClearSound(combo)}
+   else{if(match.target===10)showMakeTen();playClearSound(combo);}
    await sleep(CLEAR_ANIMATION);
    let clearedValue=0;for(const [x,y] of group){clearedValue+=board[y][x];board[y][x]=0}
    clearCells.clear();totalCleared+=group.length;
@@ -317,7 +350,8 @@ async function lockPiece(){
  spawnPiece();
 }
 function explosionShape(cx,cy){
- return [[cx-1,cy-1],[cx,cy-1],[cx+1,cy-1],[cx-1,cy],[cx+1,cy],
+ // 周囲12マスに加えて、中心の落下ブロックも爆発で消す
+ return [[cx,cy],[cx-1,cy-1],[cx,cy-1],[cx+1,cy-1],[cx-1,cy],[cx+1,cy],
  [cx-1,cy+1],[cx,cy+1],[cx+1,cy+1],[cx,cy-2],[cx,cy+2],[cx-2,cy],[cx+2,cy]]
  .filter(([x,y])=>x>=0&&x<W&&y>=0&&y<H);
 }
@@ -325,22 +359,39 @@ async function explode(){
  if(!running||paused||resolving||!piece||charge<CHARGE_MAX)return;
  resolving=true;charge=0;updateGauge();
  const cx=piece.x,cy=piece.y,targets=explosionShape(cx,cy);
+ const fx=$("explosionFX"),px=(cx+.5)/W*100,py=(cy+.5)/H*100;
  blastCells=new Set(targets.map(([x,y])=>`${x},${y}`));
- const fx=$("explosionFX");fx.innerHTML="";
- const ring=document.createElement("div");ring.className="blast-ring";
- ring.style.left=`${(cx+.5)/W*100}%`;ring.style.top=`${(cy+.5)/H*100}%`;fx.appendChild(ring);
+ fx.innerHTML="";
+ const flash=document.createElement("div");flash.className="blast-flash";
+ flash.style.setProperty("--cx",px+"%");flash.style.setProperty("--cy",py+"%");fx.appendChild(flash);
+ for(const type of ["blast-ring outer","blast-ring","blast-ring inner"]){
+  const ring=document.createElement("div");ring.className=type;ring.style.left=px+"%";ring.style.top=py+"%";fx.appendChild(ring);
+ }
+ const particleColors=["#fffbd0","#ffe36e","#ff9d35","#ff5b2e","#b8f7ff"];
+ for(let i=0;i<30;i++){
+  const angle=Math.PI*2*i/30+(Math.random()-.5)*.16;
+  const distance=55+Math.random()*115;
+  const particle=document.createElement("div");particle.className="blast-particle";
+  particle.style.setProperty("--x",px+"%");particle.style.setProperty("--y",py+"%");
+  particle.style.setProperty("--dx",Math.cos(angle)*distance+"px");particle.style.setProperty("--dy",Math.sin(angle)*distance+"px");
+  particle.style.setProperty("--size",(3+Math.random()*6)+"px");particle.style.setProperty("--color",particleColors[i%particleColors.length]);
+  particle.style.animationDelay=(Math.random()*.09)+"s";fx.appendChild(particle);
+ }
  boardEl.classList.remove("shake");void boardEl.offsetWidth;boardEl.classList.add("shake");
- playExplosionSound();setMessage("✦ POWER EXPLOSION!!",1200);render();await sleep(430);
- let removed=0;
- for(const [x,y] of targets)if(board[y][x]!==0){board[y][x]=0;removed++}
+ playExplosionSound();setMessage("✦ MEGA EXPLOSION!!",1500);render();activeEl.classList.add("blast-center");await sleep(680);
+ // 中心の落下ブロックも消滅。周囲の盤面ブロックと合わせて消去数に含める
+ let removed=1;
+ for(const [x,y] of targets){
+  if(x===cx&&y===cy)continue;
+  if(board[y][x]!==0){board[y][x]=0;removed++}
+ }
+ piece=null;activeEl.classList.remove("blast-center");
  blastCells.clear();fx.innerHTML="";compactBoard();
- while(piece&&piece.y>0&&board[piece.y][piece.x]!==0)piece.y--;
- if(piece&&board[piece.y][piece.x]!==0){resolving=false;endGame();return}
  score+=removed*15;render();await sleep(FALL_ANIMATION);resolving=false;
  await resolveClears();
  if(running&&!gameOver){
   if(board[0].some(v=>v!==0)){endGame();return}
-  setMessage(`爆発！ ${removed}マスを消去`);render();
+  setMessage(`爆発！ ${removed}マスを消去`);spawnPiece();render();
  }
 }
 function startGame(mode=selectedMode){
