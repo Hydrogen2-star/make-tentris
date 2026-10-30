@@ -250,7 +250,7 @@ function playClearSound(combo){
  playTone(450+combo*110,.12,"triangle",.035);
  playTone(700+combo*150,.16,"sine",.025,.06);
 }
-const JUDGEMENTS={20:"Good",30:"Nice",40:"Great",50:"Excellent",60:"Amazing",70:"Wonderful",80:"Fantastic",90:"Perfect"};
+const JUDGEMENTS={30:"Great",50:"Excellent",70:"Wonderful",90:"Perfect"};
 function showJudgement(target){
  if(target<20)return;
  const el=$("judgement");el.innerHTML=`<span class="judge-number">${target}</span><span class="judge-word">${JUDGEMENTS[target]||"Perfect"}</span>`;
