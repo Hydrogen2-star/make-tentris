@@ -251,7 +251,6 @@ function playClearSound(combo){
  playTone(700+combo*150,.16,"sine",.025,.06);
 }
 const JUDGEMENTS={30:"Great",50:"Excellent",70:"Wonderful",90:"Perfect"};
- const judgement = judgements[target] || "";
 function showJudgement(target){
  if(target<20)return;
  const el=$("judgement");el.innerHTML=`<span class="judge-number">${target}</span><span class="judge-word">${JUDGEMENTS[target]||"Perfect"}</span>`;
