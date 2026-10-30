@@ -122,7 +122,7 @@ let selectedMode="normal";
 let running=false,paused=false,gameOver=false,resolving=false;
 let lockTimer=0,lastTime=0,fallTimer=0,fallInterval=750,charge=0,maxCombo=0;
 let messageTimer=null,blastCells=new Set(),clearCells=new Set(),audioCtx=null;
-const CHARGE_MAX=100,LOCK_DELAY=600,TIME_CHARGE_PER_SECOND=.02;
+const CHARGE_MAX=100,LOCK_DELAY=5000,TIME_CHARGE_PER_SECOND=.02;
 const CLEAR_ANIMATION=280,FALL_ANIMATION=230;
 
 for(let y=0;y<H;y++)for(let x=0;x<W;x++){
@@ -131,6 +131,7 @@ for(let y=0;y<H;y++)for(let x=0;x<W;x++){
 }
 const activeEl=document.createElement("div");activeEl.className="active";activeEl.style.display="none";boardEl.appendChild(activeEl);
 
+// モード別の出現確率
 function randomNumber(){
  const values=[1,2,3,4,5,6,7,8,9];
  const weights=selectedMode==="challenge"?[1,1,1,1,1,1,1,1,1]:[6,10,13,14,14,14,13,10,6];
@@ -184,7 +185,10 @@ function canMove(x,y){return x>=0&&x<W&&y>=0&&y<H&&board[y][x]===0}
 function move(dx,dy){
  if(!running||paused||resolving||!piece)return;
  const nx=piece.x+dx,ny=piece.y+dy;
- if(canMove(nx,ny)){piece.x=nx;piece.y=ny;lockTimer=0;fallTimer=0;render()}
+ if(canMove(nx,ny)){
+  if(ny!==piece.y)lockTimer=0;
+  piece.x=nx;piece.y=ny;fallTimer=0;render();
+ }
  else if(dy===1)lockTimer=Math.max(lockTimer,1);
 }
 function holdPiece(){
@@ -202,6 +206,8 @@ function compactBoard(){
   for(let y=write;y>=0;y--)board[y][x]=0;
  }
 }
+
+// モードごとに許可された合計だけを消去対象にする
 function findAllMatches(){
  const matched=new Set();let biggestTarget=0;
  const allowedTargets=selectedMode==="challenge"?[10,30,50,70,90]:[10];
@@ -250,6 +256,7 @@ function playTone(freq,duration,type="sine",volume=.04,delay=0){
  }catch(e){}
 }
 function playClearSound(combo){
+ // NORMAL / SPEED：連鎖の邪魔をしない、短く控えめな消去音
  const pitch=420+Math.min(combo-1,5)*45;
  playTone(pitch,.075,"sine",.018);
  playTone(pitch*1.45,.095,"sine",.012,.035);
@@ -377,6 +384,7 @@ function loop(now){
  if(!resolving&&piece){
   charge=Math.min(CHARGE_MAX,charge+TIME_CHARGE_PER_SECOND*dt/1000);
   fallTimer+=dt;
+  // 50点ごとに加速。上限を設けず、終盤も同じ加速率を維持する
   const level=Math.floor(score/50);
   const isFastMode=selectedMode==="speed"||selectedMode==="super";
   const baseInterval=selectedMode==="super"?100:selectedMode==="speed"?200:750;
