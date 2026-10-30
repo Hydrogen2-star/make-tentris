@@ -32,6 +32,16 @@ main{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
 #readyText.ready{color:var(--gold);font-weight:900}
 #combo{position:absolute;z-index:20;top:34%;left:50%;transform:translate(-50%,-50%) scale(.3);opacity:0;pointer-events:none;white-space:nowrap;font-size:clamp(26px,7vw,48px);font-weight:1000;font-style:italic;color:#ffe56f;-webkit-text-stroke:1px #ff842b;text-shadow:0 0 12px #ffad32,0 4px 0 #9e421d}
 #combo.show{animation:comboPop .85s ease-out forwards}
+#judgement{position:absolute;z-index:25;left:50%;top:52%;transform:translate(-50%,-50%) scale(.3);opacity:0;pointer-events:none;text-align:center;white-space:nowrap;font-weight:1000;text-shadow:0 3px 0 #172033,0 0 18px #fff}
+#judgement.show{animation:judgePop 1.05s ease-out forwards}
+#judgement .judge-number{display:block;font-size:clamp(42px,11vw,72px);line-height:1;color:#ffe66d;-webkit-text-stroke:2px #9b4b22}
+#judgement .judge-word{display:block;font-size:clamp(22px,6vw,38px);color:#fff}
+@keyframes judgePop{0%{opacity:0;transform:translate(-50%,-50%) scale(.25) rotate(-10deg)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.2) rotate(4deg)}35%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-75%) scale(.85)}}
+.mode-buttons{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.mode-buttons button{min-width:115px;padding:11px 14px;font-size:14px}
+#normalModeBtn{border-color:#50e7ff;color:#50e7ff}
+#challengeModeBtn{border-color:#ffbd59;color:#ffcf78}
+#modeSelectBtn{display:none;margin-top:8px}
 @keyframes comboPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(-9deg)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.2) rotate(3deg)}38%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-80%) scale(.9)}}
 #board.shake{animation:shake .28s linear}
 @keyframes shake{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
@@ -62,7 +72,7 @@ button:disabled{opacity:.35}
 <body>
 <header>
 <h1>SUM 10 <span style="color:white">CHAIN</span></h1>
-<div class="subtitle">CONNECT · CLEAR · CHAIN · EXPLODE</div>
+<div class="subtitle" id="subtitle">CONNECT · CLEAR · CHAIN · EXPLODE</div>
 </header>
 <main>
 <aside class="side">
@@ -75,7 +85,7 @@ button:disabled{opacity:.35}
 <div id="chargeText">0%</div><div id="readyText">CHARGING...</div>
 </div>
 </aside>
-<div id="board"><div id="explosionFX"></div><div id="combo"></div></div>
+<div id="board"><div id="explosionFX"></div><div id="combo"></div><div id="judgement"></div></div>
 <aside class="side">
 <div class="panel"><div class="panel-title">NEXT</div><div id="nextDisplay" style="display:flex;flex-direction:column;gap:5px"></div></div>
 <div class="panel"><div class="panel-title">MAX COMBO</div><div id="chainDisplay" class="score">0</div></div>
@@ -90,9 +100,11 @@ button:disabled{opacity:.35}
 <div class="controls"><button id="startBtn">START / RESTART</button><button id="pauseBtn">PAUSE</button></div>
 </footer>
 <div id="overlay"><div class="modal">
-<h2 id="overlayTitle">SUM 10 CHAIN</h2>
-<p id="overlayText">数字を縦・横につなげて合計10にしよう。<br>コンボで爆発ゲージをためよう！<br>スペースキーで一気に落下。</p>
-<button id="overlayBtn">GAME START</button>
+<h2 id="overlayTitle">SUM CHAIN</h2>
+<p id="overlayText">プレイするモードを選んでね。<br>スペースキーで一気に落下。</p>
+<div class="mode-buttons" id="modeButtons"><button id="normalModeBtn">NORMAL</button><button id="challengeModeBtn">CHALLENGE</button></div>
+<button id="overlayBtn" style="display:none">もう一度プレイ</button>
+<button id="modeSelectBtn">モード選択へ</button>
 </div></div>
 
 <script>
@@ -101,6 +113,7 @@ button:disabled{opacity:.35}
 const W=4,H=10,$=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const boardEl=$("board"),cells=[],board=Array.from({length:H},()=>Array(W).fill(0));
 let piece=null,hold=null,holdUsed=false,queue=[],score=0,best=0;
+let selectedMode="normal";
 let running=false,paused=false,gameOver=false,resolving=false;
 let lockTimer=0,lastTime=0,fallTimer=0,fallInterval=750,charge=0,maxCombo=0;
 let messageTimer=null,blastCells=new Set(),clearCells=new Set(),audioCtx=null;
@@ -113,10 +126,10 @@ for(let y=0;y<H;y++)for(let x=0;x<W;x++){
 }
 const activeEl=document.createElement("div");activeEl.className="active";activeEl.style.display="none";boardEl.appendChild(activeEl);
 
-// 7・8・9の確率を上げる
+// モード別の出現確率
 function randomNumber(){
  const values=[1,2,3,4,5,6,7,8,9];
- const weights=[6,10,13,14,14,14,13,10,6];
+ const weights=selectedMode==="challenge"?[1,1,1,1,1,1,1,1,1]:[6,10,13,14,14,14,13,10,6];
  let r=Math.random()*weights.reduce((a,b)=>a+b,0);
  for(let i=0;i<values.length;i++){r-=weights[i];if(r<0)return values[i]}
  return 1;
@@ -161,7 +174,7 @@ function updateGauge(){
 }
 function setMessage(text,ms=1500){
  $("message").textContent=text;if(messageTimer)clearTimeout(messageTimer);
- if(ms)messageTimer=setTimeout(()=>{if(running&&!paused)$("message").textContent="合計10を作って連鎖を狙おう！"},ms);
+ if(ms)messageTimer=setTimeout(()=>{if(running&&!paused)$("message").textContent=selectedMode==="challenge"?"合計20〜90を狙って高得点！":"合計10を作って連鎖を狙おう！"},ms);
 }
 function canMove(x,y){return x>=0&&x<W&&y>=0&&y<H&&board[y][x]===0}
 function move(dx,dy){
@@ -186,30 +199,33 @@ function compactBoard(){
  }
 }
 
-// 同時に成立したすべての組を一括で消す
+// 合計10〜90の成立箇所をすべて検出
 function findAllMatches(){
- const matched=new Set();
+ const matched=new Set();let biggestTarget=0;
+ const addSegment=(coords,sum)=>{
+  if(coords.length<2||sum<10||sum>90||sum%10!==0)return;
+  biggestTarget=Math.max(biggestTarget,sum);
+  for(const [x,y] of coords)matched.add(`${x},${y}`);
+ };
  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
   if(!board[y][x])continue;
-  let sum=0;
+  let sum=0,coords=[];
   for(let xx=x;xx<W;xx++){
    if(!board[y][xx])break;
-   sum+=board[y][xx];
-   if(sum===10&&xx>x)for(let k=x;k<=xx;k++)matched.add(`${k},${y}`);
-   if(sum>=10)break;
+   sum+=board[y][xx];coords.push([xx,y]);addSegment(coords,sum);
+   if(sum>90)break;
   }
  }
  for(let x=0;x<W;x++)for(let y=0;y<H;y++){
   if(!board[y][x])continue;
-  let sum=0;
+  let sum=0,coords=[];
   for(let yy=y;yy<H;yy++){
    if(!board[yy][x])break;
-   sum+=board[yy][x];
-   if(sum===10&&yy>y)for(let k=y;k<=yy;k++)matched.add(`${x},${k}`);
-   if(sum>=10)break;
+   sum+=board[yy][x];coords.push([x,yy]);addSegment(coords,sum);
+   if(sum>90)break;
   }
  }
- return [...matched].map(k=>k.split(",").map(Number));
+ return {cells:[...matched].map(k=>k.split(",").map(Number)),target:biggestTarget};
 }
 function addCharge(combo){charge=Math.min(CHARGE_MAX,charge+2.5*combo*combo);updateGauge()}
 function showCombo(n){
@@ -234,6 +250,19 @@ function playClearSound(combo){
  playTone(450+combo*110,.12,"triangle",.035);
  playTone(700+combo*150,.16,"sine",.025,.06);
 }
+const JUDGEMENTS={20:"Good",30:"Nice",40:"Great",50:"Excellent",60:"Amazing",70:"Wonderful",80:"Fantastic",90:"Perfect"};
+function showJudgement(target){
+ if(target<20)return;
+ const el=$("judgement");el.innerHTML=`<span class="judge-number">${target}</span><span class="judge-word">${JUDGEMENTS[target]||"Perfect"}</span>`;
+ el.classList.remove("show");void el.offsetWidth;el.classList.add("show");
+}
+function playJudgementSound(target){
+ const level=Math.max(2,Math.min(9,target/10)),base=300+level*45;
+ playTone(base,.16,"triangle",.055);
+ playTone(base*1.25,.2,"sine",.045,.07);
+ playTone(base*1.5,.28,"sine",.035,.14);
+ if(level>=6)playTone(base*2,.32,"triangle",.025,.2);
+}
 function playExplosionSound(){
  playTone(100,.45,"sawtooth",.09);playTone(260,.35,"triangle",.06,.03);
  playTone(680,.22,"square",.025,.08);
@@ -244,13 +273,17 @@ async function resolveClears(){
  resolving=true;let combo=0,totalCleared=0;
  try{
   while(true){
-   const group=findAllMatches();if(group.length===0)break;
+   const match=findAllMatches(),group=match.cells;if(group.length===0)break;
    combo++;maxCombo=Math.max(maxCombo,combo);$("chainDisplay").textContent=maxCombo;
    clearAnimation(group);if(combo>=2)showCombo(combo);
-   playClearSound(combo);await sleep(CLEAR_ANIMATION);
-   for(const [x,y] of group)board[y][x]=0;
+   if(selectedMode==="challenge"&&match.target>=20){showJudgement(match.target);playJudgementSound(match.target)}
+   else playClearSound(combo);
+   await sleep(CLEAR_ANIMATION);
+   let clearedValue=0;for(const [x,y] of group){clearedValue+=board[y][x];board[y][x]=0}
    clearCells.clear();totalCleared+=group.length;
-   score+=group.length*10*combo;addCharge(combo);
+   if(selectedMode==="challenge")score+=clearedValue*10*combo;
+   else score+=group.length*10*combo;
+   addCharge(combo);
    compactBoard();render();await sleep(FALL_ANIMATION);
   }
   if(totalCleared>0){
@@ -296,8 +329,12 @@ async function explode(){
   setMessage(`爆発！ ${removed}マスを消去`);render();
  }
 }
-function startGame(){
- init();$("overlay").classList.add("hidden");running=true;paused=false;gameOver=false;
+function startGame(mode=selectedMode){
+ selectedMode=mode;
+ $("subtitle").textContent=selectedMode==="challenge"?"CHALLENGE · SUM 20–90 · BIGGER SUM, BIGGER SCORE":"NORMAL · SUM 10 · CONNECT · CLEAR · CHAIN";
+ renderRanking();
+ $("overlay").classList.add("hidden");$("modeButtons").style.display="none";$("overlayBtn").style.display="none";$("modeSelectBtn").style.display="none";
+ init();running=true;paused=false;gameOver=false;
  lastTime=performance.now();spawnPiece();setMessage("ゲーム開始！");requestAnimationFrame(loop);
 }
 function init(){
@@ -307,10 +344,11 @@ function init(){
  clearCells.clear();blastCells.clear();gameOver=false;$("chainDisplay").textContent="0";render();
 }
 function endGame(){
- running=false;paused=false;gameOver=true;piece=null;best=Math.max(best,score);saveRanking(score);render();
+ running=false;paused=false;gameOver=true;piece=null;best=Math.max(best,score);saveRanking(score,selectedMode);render();
  $("overlayTitle").textContent="GAME OVER";
- $("overlayText").innerHTML=`SCORE: <b>${score.toLocaleString()}</b><br>最高コンボ: <b>${maxCombo}</b>`;
- $("overlayBtn").textContent="もう一度プレイ";$("overlay").classList.remove("hidden");
+ $("overlayText").innerHTML=`${selectedMode==="challenge"?"CHALLENGE":"NORMAL"}<br>SCORE: <b>${score.toLocaleString()}</b><br>最高コンボ: <b>${maxCombo}</b>`;
+ $("modeButtons").style.display="none";$("overlayBtn").style.display="inline-block";$("overlayBtn").textContent="同じモードでもう一度";
+ $("modeSelectBtn").style.display="inline-block";$("overlay").classList.remove("hidden");
 }
 function togglePause(){
  if(!running||gameOver||resolving)return;
@@ -324,7 +362,6 @@ function loop(now){
  if(!resolving&&piece){
   charge=Math.min(CHARGE_MAX,charge+TIME_CHARGE_PER_SECOND*dt/1000);
   fallTimer+=dt;
-  // 50点ごとに加速。終盤は最低80ms間隔まで速くなる
   const level=Math.floor(score/50);
   fallInterval=Math.max(80,750*Math.pow(.90,level));
   if(fallTimer>=fallInterval){
@@ -344,15 +381,20 @@ function hardDrop(){
  render();
  lockPiece();
 }
-function saveRanking(s){
+function saveRanking(s,mode){
  try{
-  const scores=JSON.parse(localStorage.getItem("sum10chain-ranks")||"[]");
+  const key=`sum10chain-ranks-${mode}`;
+  const oldScores=mode==="normal"?JSON.parse(localStorage.getItem("sum10chain-ranks")||"[]"):[];
+  const scores=JSON.parse(localStorage.getItem(key)||JSON.stringify(oldScores));
   scores.push(s);scores.sort((a,b)=>b-a);
-  localStorage.setItem("sum10chain-ranks",JSON.stringify(scores.slice(0,5)));
+  localStorage.setItem(key,JSON.stringify(scores.slice(0,5)));
  }catch(e){}
 }
 function renderRanking(){
- let scores=[];try{scores=JSON.parse(localStorage.getItem("sum10chain-ranks")||"[]")}catch(e){}
+ let scores=[];try{
+  const saved=localStorage.getItem(`sum10chain-ranks-${selectedMode}`);
+  scores=JSON.parse(saved||(selectedMode==="normal"?localStorage.getItem("sum10chain-ranks"):"[]")||"[]");
+ }catch(e){}
  $("rankList").innerHTML="";
  if(!scores.length){$("rankList").innerHTML="<li>—</li>";return}
  scores.slice(0,5).forEach(s=>{
@@ -368,9 +410,18 @@ $("downBtn").addEventListener("click",()=>{
 });
 $("holdBtn").addEventListener("click",holdPiece);
 $("blastBtn").addEventListener("click",explode);
-$("startBtn").addEventListener("click",startGame);
+$("startBtn").addEventListener("click",()=>startGame(selectedMode));
 $("pauseBtn").addEventListener("click",togglePause);
-$("overlayBtn").addEventListener("click",startGame);
+$("overlayBtn").addEventListener("click",()=>startGame(selectedMode));
+$("normalModeBtn").addEventListener("click",()=>startGame("normal"));
+$("challengeModeBtn").addEventListener("click",()=>startGame("challenge"));
+$("modeSelectBtn").addEventListener("click",()=>{
+ running=false;paused=false;piece=null;selectedMode="normal";
+ $("overlayTitle").textContent="SUM CHAIN";
+ $("overlayText").innerHTML="プレイするモードを選んでね。<br>スペースキーで一気に落下。";
+ $("modeButtons").style.display="flex";$("overlayBtn").style.display="none";$("modeSelectBtn").style.display="none";
+ $("overlay").classList.remove("hidden");render();
+});
 document.addEventListener("keydown",e=>{
  if(["ArrowLeft","ArrowRight","ArrowDown","Enter"," "].includes(e.key))e.preventDefault();
  if(e.repeat&&["Enter"," ","c","C"].includes(e.key))return;
