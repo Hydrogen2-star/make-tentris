@@ -36,6 +36,8 @@ main{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
 #judgement.show{animation:judgePop 1.05s ease-out forwards}
 #judgement .judge-number{display:block;font-size:clamp(42px,11vw,72px);line-height:1;color:#ffe66d;-webkit-text-stroke:2px #9b4b22}
 #judgement .judge-word{display:block;font-size:clamp(22px,6vw,38px);color:#fff}
+#judgement.make-ten{text-shadow:0 2px 0 #24516a,0 0 12px #8eeeff99}
+#judgement.make-ten .make-ten-word{display:block;font-size:clamp(25px,6vw,42px);letter-spacing:2px;color:#eafcff;-webkit-text-stroke:1px #3986a4}
 @keyframes judgePop{0%{opacity:0;transform:translate(-50%,-50%) scale(.25) rotate(-10deg)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.2) rotate(4deg)}35%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-75%) scale(.85)}}
 .mode-buttons{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
 .mode-buttons button{min-width:105px;padding:11px 12px;font-size:14px}
@@ -259,6 +261,13 @@ function showJudgement(target){
  const el=$("judgement");el.innerHTML=`<span class="judge-number">${target}</span><span class="judge-word">${word}</span>`;
  el.classList.remove("show");void el.offsetWidth;el.classList.add("show");
 }
+function showMakeTen(){
+ const el=$("judgement");
+ el.classList.add("make-ten");
+ el.innerHTML='<span class="make-ten-word">MAKE 10!</span>';
+ el.classList.remove("show");void el.offsetWidth;el.classList.add("show");
+ setTimeout(()=>el.classList.remove("make-ten"),1100);
+}
 function playJudgementSound(target){
  const level=Math.max(2,Math.min(9,target/10)),base=300+level*45;
  playTone(base,.16,"triangle",.055);
@@ -280,7 +289,10 @@ async function resolveClears(){
    combo++;maxCombo=Math.max(maxCombo,combo);$("chainDisplay").textContent=maxCombo;
    clearAnimation(group);if(combo>=2)showCombo(combo);
    if(selectedMode==="challenge"&&JUDGEMENTS[match.target]){showJudgement(match.target);playJudgementSound(match.target)}
-   else playClearSound(combo);
+   else{
+    if(match.target===10)showMakeTen();
+    playClearSound(combo);
+   }
    await sleep(CLEAR_ANIMATION);
    let clearedValue=0;for(const [x,y] of group){clearedValue+=board[y][x];board[y][x]=0}
    clearCells.clear();totalCleared+=group.length;
@@ -365,7 +377,6 @@ function loop(now){
  if(!resolving&&piece){
   charge=Math.min(CHARGE_MAX,charge+TIME_CHARGE_PER_SECOND*dt/1000);
   fallTimer+=dt;
-  // 50点ごとに加速。上限を設けず、終盤も同じ加速率を維持する
   const level=Math.floor(score/50);
   const isFastMode=selectedMode==="speed"||selectedMode==="super";
   const baseInterval=selectedMode==="super"?100:selectedMode==="speed"?200:750;
