@@ -166,7 +166,7 @@ body.challenge-mode #hardDropBtn{background:linear-gradient(135deg,#176c89,#244d
 
 </style>
 </head>
-<body>
+ <body>
 <header>
 <h1>SUM 10 <span style="color:white">CHAIN</span></h1>
 <div class="subtitle" id="subtitle">CONNECT · CLEAR · CHAIN · EXPLODE</div>
@@ -359,7 +359,7 @@ function findAllMatches(){
   for(const [x,y] of coords)matched.add(`${x},${y}`);
  };
  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
-  if(!board[y][x])continue;
+    if(!board[y][x])continue;
   let sum=0,coords=[];
   for(let xx=x;xx<W;xx++){
    if(!board[y][xx])break;
@@ -540,3 +540,283 @@ function explosionShape(cx,cy){
 }
 async function explode(){
  if(!running||paused||resolving||!piece||charge<CHARGE_MAX)return;
+  resolving=true;charge=0;updateGauge();
+ const cx=piece.x,cy=piece.y,targets=explosionShape(cx,cy);
+ const fx=$("explosionFX"),px=(cx+.5)/W*100,py=(cy+.5)/H*100;
+ blastCells=new Set(targets.map(([x,y])=>`${x},${y}`));
+ fx.innerHTML="";
+ const flash=document.createElement("div");flash.className="blast-flash";
+ flash.style.setProperty("--cx",px+"%");flash.style.setProperty("--cy",py+"%");fx.appendChild(flash);
+ for(const type of ["blast-ring outer","blast-ring","blast-ring inner"]){
+  const ring=document.createElement("div");ring.className=type;ring.style.left=px+"%";ring.style.top=py+"%";fx.appendChild(ring);
+ }
+ const particleColors=["#fffbd0","#ffe36e","#ff9d35","#ff5b2e","#b8f7ff"];
+ for(let i=0;i<30;i++){
+  const angle=Math.PI*2*i/30+(Math.random()-.5)*.16;
+  const distance=55+Math.random()*115;
+  const particle=document.createElement("div");particle.className="blast-particle";
+  particle.style.setProperty("--x",px+"%");particle.style.setProperty("--y",py+"%");
+  particle.style.setProperty("--dx",Math.cos(angle)*distance+"px");particle.style.setProperty("--dy",Math.sin(angle)*distance+"px");
+  particle.style.setProperty("--size",(3+Math.random()*6)+"px");particle.style.setProperty("--color",particleColors[i%particleColors.length]);
+  particle.style.animationDelay=(Math.random()*.09)+"s";fx.appendChild(particle);
+ }
+ boardEl.classList.remove("shake");void boardEl.offsetWidth;boardEl.classList.add("shake");
+ playExplosionSound();setMessage("✦ MEGA EXPLOSION!!",1500);render();activeEl.classList.add("blast-center");await sleep(680);
+ // 中心の落下ブロックも消滅。周囲の盤面ブロックと合わせて消去数に含める
+ let removed=1;
+ for(const [x,y] of targets){
+  if(x===cx&&y===cy)continue;
+  if(board[y][x]!==0){board[y][x]=0;removed++}
+ }
+ piece=null;activeEl.classList.remove("blast-center");
+ blastCells.clear();fx.innerHTML="";compactBoard();
+ score+=removed*15;render();await sleep(FALL_ANIMATION);resolving=false;
+ await resolveClears();
+ if(running&&!gameOver){
+  if(board[0].some(v=>v!==0)){endGame();return}
+  setMessage(`爆発！ ${removed}マスを消去`);spawnPiece();render();
+ }
+}
+function startGame(mode=selectedMode){
+ if(!ensurePlayerName())return;
+ selectedMode=mode;
+ document.body.classList.toggle("challenge-mode",selectedMode==="challenge");
+ $("subtitle").textContent=selectedMode==="challenge"?"CHALLENGE · SUM 10–90 · 3 MIN TIME ATTACK":selectedMode==="super"?"SUPER SPEED · 100MS START · KEEP ACCELERATING":selectedMode==="speed"?"SPEED · FAST START · KEEP ACCELERATING":"NORMAL · SUM 10 · CONNECT · CLEAR · CHAIN";
+ renderRanking();
+ $("overlay").classList.add("hidden");$("modeButtons").style.display="none";$("modeDescription").style.display="none";$("introDescription").style.display="none";$("overlayBtn").style.display="none";$("modeSelectBtn").style.display="none";$("resultRanking").classList.remove("visible");
+ init();running=true;paused=false;gameOver=false;
+ challengeTimeLeft=180000;challengeCompletedTargets.clear();renderChallengeTracker();$("timerPanel").style.display=selectedMode==="challenge"?"block":"none";updateChallengeTimer();
+ lastTime=performance.now();spawnPiece();setMessage("ゲーム開始！");requestAnimationFrame(loop);
+}
+function init(){
+ for(let y=0;y<H;y++)board[y].fill(0);
+ piece=null;hold=null;holdUsed=false;queue=[];score=0;charge=0;maxCombo=0;
+ fallTimer=0;lockTimer=0;groundedTimer=0;groundedY=-1;fallInterval=750;resolving=false;
+ clearCells.clear();blastCells.clear();challengeCompletedTargets.clear();renderChallengeTracker();gameOver=false;$("chainDisplay").textContent="0";render();
+}
+function endGame(reason="gameover"){
+ running=false;paused=false;gameOver=true;piece=null;best=Math.max(best,score);currentRecordId=saveRanking(score,selectedMode);render();
+ $("overlayTitle").textContent=reason==="timeup"?"TIME UP!":"GAME OVER";
+ $("overlayText").innerHTML=`${selectedMode==="challenge"?"CHALLENGE":selectedMode==="super"?"SUPER SPEED":selectedMode==="speed"?"SPEED":"NORMAL"}<br>SCORE: <b>${score.toLocaleString()}</b><br>最高コンボ: <b>${maxCombo}</b>${reason==="timeup"?"<br>3分間お疲れさま！":""}`;
+ $("resultRanking").classList.add("visible");renderResultRanking();
+ $("modeButtons").style.display="none";$("overlayBtn").style.display="inline-block";$("overlayBtn").textContent="このモードでもう一度";
+ $("modeSelectBtn").style.display="inline-block";$("modeSelectBtn").textContent="別モードを選ぶ";$("overlay").classList.remove("hidden");
+}
+function togglePause(){
+ if(!running||gameOver||resolving)return;
+ paused=!paused;
+ setMessage(paused?"一時停止中":"再開！");
+ if(!paused){lastTime=performance.now();requestAnimationFrame(loop)}
+}
+function loop(now){
+ if(!running||paused||gameOver)return;
+ const dt=Math.min(now-lastTime,100);lastTime=now;
+ if(selectedMode==="challenge") {
+  challengeTimeLeft=Math.max(0,challengeTimeLeft-dt);updateChallengeTimer();
+  if(challengeTimeLeft<=0&&!resolving){endGame("timeup");return;}
+ }
+ if(!resolving&&piece){
+  charge=Math.min(CHARGE_MAX,charge+TIME_CHARGE_PER_SECOND*dt/1000);
+  fallTimer+=dt;
+  // 50点ごとに加速。上限を設けず、終盤も同じ加速率を維持する
+  if(selectedMode==="challenge"){
+   // チャレンジはスコアではなく、経過時間に応じて15秒ごとに加速する
+   const elapsedTime=180000-challengeTimeLeft;
+   const timeLevel=Math.floor(elapsedTime/15000);
+   fallInterval=Math.max(160,750*Math.pow(.90,timeLevel));
+  }else{
+   const level=Math.floor(score/50);
+   const isFastMode=selectedMode==="speed"||selectedMode==="super";
+   const baseInterval=selectedMode==="super"?100:selectedMode==="speed"?200:750;
+   const acceleration=isFastMode?.89:.90;
+   fallInterval=baseInterval*Math.pow(acceleration,level);
+  }
+  if(fallTimer>=fallInterval){
+   fallTimer=0;
+   if(canMove(piece.x,piece.y+1))piece.y++;
+  }
+
+  const grounded=!canMove(piece.x,piece.y+1);
+  if(!grounded){
+   // 下に落ちられる状態になったら、着地時間と停止時間をリセット
+   groundedTimer=0;groundedY=-1;lockTimer=0;
+  }else{
+   // 同じ高さで着地し続けた時間。左右移動ではリセットしない
+   if(groundedY!==piece.y){groundedY=piece.y;groundedTimer=0;lockTimer=0;}
+   groundedTimer+=dt;
+   // 操作を止めている時間。左右移動すると move() 側でリセットされる
+   lockTimer+=dt;
+   if(groundedTimer>=MAX_GROUNDED_TIME||lockTimer>=LOCK_DELAY)lockPiece();
+  }
+  render();
+ }
+ requestAnimationFrame(loop);
+}
+function hardDrop(){
+ if(!running||paused||resolving||!piece)return;
+ while(canMove(piece.x,piece.y+1))piece.y++;
+ render();
+ lockPiece();
+}
+function loadPlayerName(){
+ try{return (localStorage.getItem("sum10chain-player-name")||"").trim()}catch(e){return ""}
+}
+function refreshPlayerNameUI(){
+ const setup=$("playerNameSetup"),input=$("playerNameInput"),status=$("playerNameStatus"),save=$("playerNameSave");
+ if(playerName){
+  setup.style.display="block";input.style.display="none";save.style.display="none";
+  setup.querySelector("label").textContent="登録済みプレイヤー名";
+  status.textContent=playerName;
+ }else{
+  setup.style.display="block";input.style.display="block";save.style.display="block";
+  setup.querySelector("label").textContent="プレイヤー名（最初に一度だけ登録）";
+  status.textContent="";
+ }
+}
+function ensurePlayerName(){
+ if(playerName)return true;
+ const input=$("playerNameInput"),name=input.value.trim().replace(/[<>]/g,"").slice(0,12);
+ if(!name){$("playerNameStatus").textContent="プレイヤー名を入力してね。";input.focus();return false}
+ playerName=name;
+ try{localStorage.setItem("sum10chain-player-name",playerName)}catch(e){}
+ refreshPlayerNameUI();return true;
+}
+function normalizeRankingRecords(records){
+ if(!Array.isArray(records))return [];
+ return records.map((item,index)=>{
+  if(typeof item==="number")return {name:"PLAYER",score:item,id:`legacy-${index}-${item}`};
+  if(item&&typeof item.score==="number")return {name:String(item.name||"PLAYER"),score:item.score,id:String(item.id||`record-${index}-${item.score}`)};
+  return null;
+ }).filter(Boolean).sort((a,b)=>b.score-a.score).slice(0,5);
+}
+function saveRanking(s,mode){
+ const id=`${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+ try{
+  const key=`sum10chain-ranks-${mode}`;
+  const oldScores=mode==="normal"?JSON.parse(localStorage.getItem("sum10chain-ranks")||"[]"):[];
+  const raw=JSON.parse(localStorage.getItem(key)||JSON.stringify(oldScores));
+  const records=normalizeRankingRecords(raw);
+  records.push({name:playerName||"PLAYER",score:s,id});
+  records.sort((a,b)=>b.score-a.score);
+  localStorage.setItem(key,JSON.stringify(records.slice(0,5)));
+ }catch(e){}
+ return id;
+}
+ function getRankingScores(mode=selectedMode){
+ try{
+  const saved=localStorage.getItem(`sum10chain-ranks-${mode}`);
+  const fallback=mode==="normal"?localStorage.getItem("sum10chain-ranks"):"[]";
+  return normalizeRankingRecords(JSON.parse(saved||fallback||"[]"));
+ }catch(e){return []}
+}
+function renderRanking(){
+ const scores=getRankingScores();
+ const list=$("rankList");list.innerHTML="";
+ if(!scores.length){list.innerHTML="<li>—</li>";return}
+ scores.slice(0,5).forEach(record=>{
+  const li=document.createElement("li");
+  const name=document.createElement("span");name.className="ranking-name";name.textContent=record.name;
+  const value=document.createElement("span");value.className="ranking-score";value.textContent=record.score.toLocaleString();
+  li.append(name,value);list.appendChild(li);
+ });
+}
+function renderResultRanking(){
+ const scores=getRankingScores();
+ const list=$("resultRankList");list.innerHTML="";
+ if(!scores.length){list.innerHTML="<li>まだ記録がありません</li>";return}
+ scores.slice(0,5).forEach(record=>{
+  const li=document.createElement("li");
+  const name=document.createElement("span");name.className="ranking-name";name.textContent=record.name;
+  const value=document.createElement("span");value.className="ranking-score";value.textContent=record.score.toLocaleString();
+  li.append(name,value);
+  if(record.id===currentRecordId)li.classList.add("current-score");
+  list.appendChild(li);
+ });
+}
+$("playerNameSave").addEventListener("click",()=>{
+ if(ensurePlayerName())setMessage("プレイヤー名を登録したよ！ モードを選んでね。",2200);
+});
+$("playerNameInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("playerNameSave").click()});
+playerName=loadPlayerName();refreshPlayerNameUI();
+
+const privacyOverlay=$("privacyOverlay");
+function closePrivacy(){privacyOverlay.classList.remove("visible");privacyOverlay.setAttribute("aria-hidden","true")}
+$("privacyLink").addEventListener("click",()=>{privacyOverlay.classList.add("visible");privacyOverlay.setAttribute("aria-hidden","false")});
+$("privacyClose").addEventListener("click",closePrivacy);
+privacyOverlay.addEventListener("click",e=>{if(e.target===privacyOverlay)closePrivacy()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closePrivacy()});
+
+$("leftBtn").addEventListener("click",()=>move(-1,0));
+$("rightBtn").addEventListener("click",()=>move(1,0));
+$("downBtn").addEventListener("click",()=>{
+ if(!running||paused||resolving||!piece)return;
+ if(canMove(piece.x,piece.y+1)){piece.y++;lockTimer=0;fallTimer=0;render()}
+ else lockTimer=Math.max(lockTimer,1);
+});
+$("hardDropBtn").addEventListener("click",hardDrop);
+$("holdBtn").addEventListener("click",holdPiece);
+$("blastBtn").addEventListener("click",explode);
+$("startBtn").addEventListener("click",()=>startGame(selectedMode));
+$("overlayBtn").addEventListener("click",()=>startGame(selectedMode));
+const MODE_DESCRIPTIONS={
+ normal:{title:"NORMAL",items:["数字ブロックは時間とともに少しずつ落下速度が上がる。","ブロックが最上段（10段目）まで積み上がるとGAME OVER。","縦または横の合計を10にするとブロックを消せる。連鎖を狙ってスコアを伸ばそう。","10を作ったり連鎖したりするとPOWERゲージがたまる。満タンになったら、落下中のブロックを中心に周囲を爆発させて消去できる！","できるだけ高いスコアを目指そう！"]},
+ speed:{title:"SPEED",items:["基本ルールはNORMALと同じ。","最初からNORMALより速いスピードでブロックが落下し、時間とともにさらに加速する。","縦または横の合計を10にしてブロックを消し、連鎖とPOWERを活用しよう。","ブロックが最上段（10段目）まで積み上がるとGAME OVER。","速い展開を乗りこなし、ハイスコアを目指そう！"]},
+ super:{title:"SUPER SPEED",items:["基本ルールはNORMALと同じ。","開始直後から非常に速いスピードでブロックが落下し、時間とともにさらに加速する。","縦または横の合計を10にしてブロックを消し、連鎖とPOWERを活用しよう。","ブロックが最上段（10段目）まで積み上がるとGAME OVER。","超高速の展開に挑戦し、ハイスコアを目指そう！"]},
+ challenge:{title:"CHALLENGE",items:["制限時間は3分。時間内にできるだけ多くのスコアを獲得しよう。","数字ブロックは時間とともに少しずつ落下速度が上がる。","ブロックが最上段（10段目）まで積み上がるとGAME OVER。","縦または横の合計が10・20・30・40・50・60・70・80・90になると消去できる。合計が大きいほど得点も大きくなる！","10から90までの9種類すべてを達成すると、ビンゴボーナスを獲得！"]}
+};
+function showModeDescription(mode){
+ selectedMode=mode;
+ const data=MODE_DESCRIPTIONS[mode];
+ $("overlayTitle").textContent="MODE GUIDE";
+ $("overlayText").textContent="このモードのルールを確認して、スタートしよう。";
+ $("introDescription").style.display="none";
+ $("playerNameSetup").style.display=playerName?"none":"block";
+ $("modeButtons").style.display="none";
+ $("modeDescriptionTitle").textContent=data.title;
+ $("modeDescriptionList").innerHTML=data.items.map(item=>`<li>${item}</li>`).join("");
+ $("modeDescription").style.display="block";
+ $("overlayBtn").style.display="none";$("modeSelectBtn").style.display="none";
+ $("resultRanking").classList.remove("visible");
+ $("overlay").classList.remove("hidden");
+}
+function showModeSelect(){
+ running=false;paused=false;piece=null;selectedMode="normal";currentRecordId=null;document.body.classList.remove("challenge-mode");
+ $("overlayTitle").textContent="SUM CHAIN";
+ $("overlayText").innerHTML="プレイするモードを選んでね。<br>スペースキーで一気に落下。";
+ $("introDescription").style.display="block";$("modeDescription").style.display="none";
+ refreshPlayerNameUI();
+ $("resultRanking").classList.remove("visible");
+ $("modeButtons").style.display="flex";$("overlayBtn").style.display="none";$("modeSelectBtn").style.display="none";
+ $("overlay").classList.remove("hidden");render();
+}
+$("normalModeBtn").addEventListener("click",()=>showModeDescription("normal"));
+$("challengeModeBtn").addEventListener("click",()=>showModeDescription("challenge"));
+$("speedModeBtn").addEventListener("click",()=>showModeDescription("speed"));
+$("superModeBtn").addEventListener("click",()=>showModeDescription("super"));
+$("detailStartBtn").addEventListener("click",()=>startGame(selectedMode));
+$("detailBackBtn").addEventListener("click",showModeSelect);
+$("modeSelectBtn").addEventListener("click",showModeSelect);
+document.addEventListener("keydown",e=>{
+ if(["ArrowLeft","ArrowRight","ArrowDown","ArrowUp","Enter"," "].includes(e.key))e.preventDefault();
+ if(e.repeat&&["Enter"," ","c","C","ArrowUp"].includes(e.key))return;
+ if(e.key==="ArrowLeft"||e.key==="a"||e.key==="A")move(-1,0);
+ else if(e.key==="ArrowRight"||e.key==="d"||e.key==="D")move(1,0);
+ else if(e.key==="ArrowDown"||e.key==="s"||e.key==="S"){
+  if(running&&!paused&&!resolving&&piece&&canMove(piece.x,piece.y+1)){
+   piece.y++;lockTimer=0;fallTimer=0;render();
+  }
+ }else if(e.key==="c"||e.key==="C"||e.key==="Shift"||e.key==="ArrowUp")holdPiece();
+ else if(e.key==="Enter"){if(running&&!paused&&charge>=CHARGE_MAX)explode()}
+ else if(e.code==="Space"){hardDrop()}
+
+});
+for(const [id,dx] of [["leftBtn",-1],["rightBtn",1]]){
+ let repeatId;const btn=$(id);
+ btn.addEventListener("pointerdown",()=>{repeatId=setInterval(()=>move(dx,0),130)});
+ for(const ev of ["pointerup","pointerleave","pointercancel"])btn.addEventListener(ev,()=>clearInterval(repeatId));
+}
+render();
+})();
+</script>
+</body>
+</html>
