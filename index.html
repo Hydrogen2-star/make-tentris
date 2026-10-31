@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -117,6 +116,20 @@ button:disabled{opacity:.35}
 #playerNameInput:focus{border-color:var(--cyan);box-shadow:0 0 10px #50e7ff44}
 #playerNameSave{margin-top:8px;width:100%;background:#176c89;border-color:#50e7ff}
 #playerNameStatus{font-size:12px;color:#8ce9b4;margin-top:7px;min-height:17px}
+
+#introDescription{margin:12px auto 14px;max-width:420px;padding:12px 14px;border:1px solid #405574;border-radius:12px;background:#101a2b;text-align:left}
+#introDescription h3{margin:0 0 7px;text-align:center;color:#50e7ff;font-size:14px;letter-spacing:1px}
+#introDescription p{font-size:12px;line-height:1.7;margin:5px 0;color:#d2dced}
+#modeDescription{display:none;margin:14px auto;max-width:420px;padding:14px;border:1px solid #526887;border-radius:12px;background:#101a2b;text-align:left}
+#modeDescription.visible{display:block}
+#modeDescription h3{margin:0 0 10px;text-align:center;font-size:20px;letter-spacing:2px;color:#50e7ff}
+#modeDescription ul{padding-left:21px;margin:0}
+#modeDescription li{font-size:13px;line-height:1.75;color:#d2dced;margin:5px 0}
+#modeDescription .detail-buttons{display:flex;gap:10px;margin-top:16px}
+#modeDescription button{flex:1;padding:12px 8px;font-size:14px}
+#detailStartBtn{background:linear-gradient(135deg,#176c89,#244d78);border-color:#5ce6ff}
+#detailBackBtn{background:#28344b;border-color:#7385a5}
+
 .ranking-name{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#dce8ff;font-size:10px}
 .ranking-score{display:block;color:#ffd978;font-weight:900;font-size:11px}
 body.challenge-mode main{justify-content:center;gap:clamp(7px,2vw,20px)}
@@ -184,7 +197,18 @@ body.challenge-mode #hardDropBtn{background:linear-gradient(135deg,#176c89,#244d
 <button id="playerNameSave">名前を登録する</button>
 <div id="playerNameStatus"></div>
 </div>
+<div id="introDescription">
+<h3>HOW TO PLAY</h3>
+<p>落ちてくる<strong>1〜9の数字ブロック</strong>を動かして、縦または横に合計<strong>10</strong>になる列を作ろう！ 条件を満たしたブロックは消えるよ。</p>
+<p>連続して消すと<strong>連鎖ボーナス</strong>で得点アップ！ HOLDでブロックをキープ、NEXTで次に落ちる数字を確認できる。</p>
+<p>ハイスコアを記録して、ランキング上位を目指そう！</p>
+</div>
 <div class="mode-buttons" id="modeButtons"><button id="normalModeBtn">NORMAL</button><button id="challengeModeBtn">CHALLENGE</button><button id="speedModeBtn">SPEED</button><button id="superModeBtn">SUPER SPEED</button></div>
+<div id="modeDescription">
+<h3 id="modeDescriptionTitle"></h3>
+<ul id="modeDescriptionList"></ul>
+<div class="detail-buttons"><button id="detailBackBtn">戻る</button><button id="detailStartBtn">スタート</button></div>
+</div>
 <button id="overlayBtn" style="display:none">もう一度プレイ</button><button id="modeSelectBtn">モード選択へ</button>
 </div></div>
 
@@ -503,13 +527,85 @@ async function explode(){
   setMessage(`爆発！ ${removed}マスを消去`);spawnPiece();render();
  }
 }
+
+const MODE_DESCRIPTIONS={
+ normal:{title:"NORMAL",items:[
+ "ブロックの落下速度は、時間が経つにつれて少しずつ速くなるよ。",
+ "ブロックが10行目まで積み上がるとGAME OVER。",
+ "合計10を作って消したり、連鎖をつなげたりするとPOWERがたまる！",
+ "POWERを使うと、落下中のブロックを中心に爆発！ 周囲のブロックをまとめて消せるよ。",
+ "高得点を目指して、ベストスコアを更新しよう！"
+ ]},
+ speed:{title:"SPEED",items:[
+ "基本ルールはNORMALと同じ。合計10の消去、連鎖、POWERを使いこなそう！",
+ "ブロックの落下速度は、時間が経つにつれて少しずつ速くなるよ。",
+ "ブロックが10行目まで積み上がるとGAME OVER。",
+ "合計10を作って消したり、連鎖をつなげたりするとPOWERがたまる。",
+ "POWERを使うと、落下中のブロックを中心に爆発し、周囲のブロックを消せるよ。",
+ "最初からNORMALより少し速いスピードでスタート！"
+ ]},
+ super:{title:"SUPER SPEED",items:[
+ "基本ルールはNORMALと同じ。合計10の消去、連鎖、POWERを使いこなそう！",
+ "ブロックの落下速度は、時間が経つにつれて少しずつ速くなるよ。",
+ "ブロックが10行目まで積み上がるとGAME OVER。",
+ "合計10を作って消したり、連鎖をつなげたりするとPOWERがたまる。",
+ "POWERを使うと、落下中のブロックを中心に爆発し、周囲のブロックを消せるよ。",
+ "最初からかなり速いスピードでスタート！"
+ ]},
+ challenge:{title:"CHALLENGE",items:[
+ "制限時間は3分間！ 時間内にどこまでスコアを伸ばせるか挑戦しよう。",
+ "ブロックの落下速度は、時間が経つにつれて少しずつ速くなるよ。",
+ "ブロックが10行目まで積み上がるとGAME OVER。",
+ "縦または横に合計10・20・30・40・50・60・70・80・90の列を作ると消える！",
+ "合計が10大きくなるごとに、獲得できる得点が大幅にアップ！",
+ "10〜90の9種類すべてを作ると、BINGO達成で大幅得点GET！",
+ "ランキング上位を目指そう！"
+ ]}
+};
+
+function showModeDescription(mode){
+ if(!ensurePlayerName())return;
+ selectedMode=mode;
+ const data=MODE_DESCRIPTIONS[mode];
+ $("overlayTitle").textContent="READY?";
+ $("overlayText").textContent="選んだモードのルールを確認して、スタートしよう！";
+ $("introDescription").style.display="none";
+ $("playerNameSetup").style.display="none";
+ $("modeButtons").style.display="none";
+ $("modeDescriptionTitle").textContent=data.title;
+ $("modeDescriptionList").innerHTML="";
+ data.items.forEach(item=>{
+  const li=document.createElement("li");li.textContent=item;$("modeDescriptionList").appendChild(li);
+ });
+ $("modeDescription").classList.add("visible");
+ $("overlayBtn").style.display="none";
+ $("modeSelectBtn").style.display="none";
+ $("resultRanking").classList.remove("visible");
+ $("overlay").classList.remove("hidden");
+}
+function showModeSelect(){
+ running=false;paused=false;piece=null;selectedMode="normal";currentRecordId=null;
+ document.body.classList.remove("challenge-mode");
+ $("overlayTitle").textContent="SUM CHAIN";
+ $("overlayText").innerHTML="プレイするモードを選んでね。<br>スペースキーで一気に落下。";
+ $("resultRanking").classList.remove("visible");
+ $("modeDescription").classList.remove("visible");
+ $("introDescription").style.display="block";
+ $("playerNameSetup").style.display="block";
+ $("modeButtons").style.display="flex";
+ $("overlayBtn").style.display="none";
+ $("modeSelectBtn").style.display="none";
+ $("overlay").classList.remove("hidden");
+ refreshPlayerNameUI();render();
+}
+
 function startGame(mode=selectedMode){
  if(!ensurePlayerName())return;
  selectedMode=mode;
  document.body.classList.toggle("challenge-mode",selectedMode==="challenge");
  $("subtitle").textContent=selectedMode==="challenge"?"CHALLENGE · SUM 10–90 · 3 MIN TIME ATTACK":selectedMode==="super"?"SUPER SPEED · 100MS START · KEEP ACCELERATING":selectedMode==="speed"?"SPEED · FAST START · KEEP ACCELERATING":"NORMAL · SUM 10 · CONNECT · CLEAR · CHAIN";
  renderRanking();
- $("overlay").classList.add("hidden");$("modeButtons").style.display="none";$("overlayBtn").style.display="none";$("modeSelectBtn").style.display="none";$("resultRanking").classList.remove("visible");
+ $("overlay").classList.add("hidden");$("modeButtons").style.display="none";$("introDescription").style.display="none";$("playerNameSetup").style.display="none";$("modeDescription").classList.remove("visible");$("overlayBtn").style.display="none";$("modeSelectBtn").style.display="none";$("resultRanking").classList.remove("visible");
  init();running=true;paused=false;gameOver=false;
  challengeTimeLeft=180000;challengeCompletedTargets.clear();renderChallengeTracker();$("timerPanel").style.display=selectedMode==="challenge"?"block":"none";updateChallengeTimer();
  lastTime=performance.now();spawnPiece();setMessage("ゲーム開始！");requestAnimationFrame(loop);
@@ -670,18 +766,13 @@ $("holdBtn").addEventListener("click",holdPiece);
 $("blastBtn").addEventListener("click",explode);
 $("startBtn").addEventListener("click",()=>startGame(selectedMode));
 $("overlayBtn").addEventListener("click",()=>startGame(selectedMode));
-$("normalModeBtn").addEventListener("click",()=>startGame("normal"));
-$("challengeModeBtn").addEventListener("click",()=>startGame("challenge"));
-$("speedModeBtn").addEventListener("click",()=>startGame("speed"));
-$("superModeBtn").addEventListener("click",()=>startGame("super"));
-$("modeSelectBtn").addEventListener("click",()=>{
- running=false;paused=false;piece=null;selectedMode="normal";currentRecordId=null;document.body.classList.remove("challenge-mode");
- $("overlayTitle").textContent="SUM CHAIN";
- $("overlayText").innerHTML="プレイするモードを選んでね。<br>スペースキーで一気に落下。";
- $("resultRanking").classList.remove("visible");
- $("modeButtons").style.display="flex";$("overlayBtn").style.display="none";$("modeSelectBtn").style.display="none";
- $("overlay").classList.remove("hidden");render();
-});
+$("normalModeBtn").addEventListener("click",()=>showModeDescription("normal"));
+$("challengeModeBtn").addEventListener("click",()=>showModeDescription("challenge"));
+$("speedModeBtn").addEventListener("click",()=>showModeDescription("speed"));
+$("superModeBtn").addEventListener("click",()=>showModeDescription("super"));
+$("detailStartBtn").addEventListener("click",()=>startGame(selectedMode));
+$("detailBackBtn").addEventListener("click",showModeSelect);
+$("modeSelectBtn").addEventListener("click",showModeSelect);
 document.addEventListener("keydown",e=>{
  if(["ArrowLeft","ArrowRight","ArrowDown","ArrowUp","Enter"," "].includes(e.key))e.preventDefault();
  if(e.repeat&&["Enter"," ","c","C","ArrowUp"].includes(e.key))return;
