@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -15,7 +15,7 @@ header{width:100%;text-align:center;padding:8px 0 4px;flex-shrink:0}
 .tracker-title{font-size:9px;letter-spacing:2px;color:#d9bd83;text-align:center;margin-bottom:5px;font-weight:900}
 .tracker-items{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:4px}
 .tracker-item{border:1px solid #3d3a3c;border-radius:6px;background:#11151e;color:#555d6c;text-align:center;padding:3px 0;font-size:clamp(11px,2.8vw,15px);font-weight:950;text-shadow:none;transition:all .25s}
-.tracker-item.lit{color:#fff3a5;border-color:#ffd166;background:linear-gradient(145deg,#795323,#33291d);box-shadow:0 0 9px #ffc44d88,inset 0 0 8px #ffe7a044;text-shadow:0 0 8px #ffe27a}
+.tracker-item.lit{color:#fff3a5;border-color:#ffd166;background:linear-gradient(145deg,#795323,#33291d);box-shadow:0 0 9px #ffc44d88, inset 0 0 8px #ffe7a044;text-shadow:0 0 8px #ffe27a}
 .tracker-item.reach{animation:trackerReach .65s ease-in-out infinite alternate}
 .tracker-item.bingo{animation:trackerBingo .45s ease-in-out 3}
 @keyframes trackerReach{to{transform:translateY(-3px) scale(1.07);box-shadow:0 0 18px #ffdc66;border-color:#fff4b0}}
@@ -59,6 +59,14 @@ main{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
 #judgement.make-ten{text-shadow:0 2px 0 #24516a,0 0 12px #8eeeff99}
 #judgement.make-ten .make-ten-word{display:block;font-size:clamp(25px,6vw,42px);letter-spacing:2px;color:#eafcff;-webkit-text-stroke:1px #3986a4}
 @keyframes judgePop{0%{opacity:0;transform:translate(-50%,-50%) scale(.25) rotate(-10deg)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.2) rotate(4deg)}35%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-75%) scale(.85)}}
+#playerNameSetup{margin:12px auto 16px;max-width:340px;padding:12px;border:1px solid #526887;border-radius:12px;background:#101a2b}
+#playerNameSetup label{display:block;font-size:12px;color:#c0cce0;margin-bottom:7px}
+#playerNameInput{width:100%;padding:10px;border:1px solid #647896;border-radius:8px;background:#080f1c;color:#fff;font-size:16px;text-align:center;outline:none}
+#playerNameInput:focus{border-color:var(--cyan);box-shadow:0 0 10px #50e7ff44}
+#playerNameSave{margin-top:8px;width:100%;background:#176c89;border-color:#50e7ff}
+#playerNameStatus{font-size:12px;color:#8ce9b4;margin-top:7px;min-height:17px}
+.ranking-name{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#dce8ff;font-size:10px}
+.ranking-score{display:block;color:#ffd978;font-weight:900;font-size:11px}
 .mode-buttons{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
 .mode-buttons button{min-width:105px;padding:11px 12px;font-size:14px}
 #normalModeBtn{border-color:#50e7ff;color:#50e7ff}
@@ -109,23 +117,23 @@ button:disabled{opacity:.35}
 #overlayBtn,#modeSelectBtn{padding:12px 18px;font-size:14px;margin:4px}
 #overlayBtn{background:linear-gradient(135deg,#176c89,#244d78);border-color:#5ce6ff;color:#fff}
 #modeSelectBtn{background:#28344b;border-color:#7385a5;color:#e5edff}
-#playerNameSetup{margin:12px auto 16px;max-width:340px;padding:12px;border:1px solid #526887;border-radius:12px;background:#101a2b}
-#playerNameSetup label{display:block;font-size:12px;color:#c0cce0;margin-bottom:7px}
-#playerNameInput{width:100%;padding:10px;border:1px solid #647896;border-radius:8px;background:#080f1c;color:#fff;font-size:16px;text-align:center;outline:none}
-#playerNameInput:focus{border-color:var(--cyan);box-shadow:0 0 10px #50e7ff44}
-#playerNameSave{margin-top:8px;width:100%;background:#176c89;border-color:#50e7ff}
-#playerNameStatus{font-size:12px;color:#8ce9b4;margin-top:7px;min-height:17px}
-#privacyLink{border:0;background:transparent;color:#8190aa;font-size:10px;font-weight:500;padding:2px 6px;min-width:0;text-decoration:underline;text-underline-offset:2px}
-#privacyLink:hover{color:#c5d5ef}
-#privacyOverlay{position:fixed;inset:0;z-index:80;background:#070b14ee;display:none;align-items:center;justify-content:center;padding:12px}
-#privacyOverlay.visible{display:flex}
-#privacyModal{width:min(680px,100%);max-height:calc(100dvh - 24px);overflow-y:auto;text-align:left;border:1px solid #4a5d7b;border-radius:16px;background:linear-gradient(160deg,#202e49,#151e30);padding:clamp(16px,4vw,26px);box-shadow:0 18px 60px #000b}
-#privacyModal h2{margin:0 0 16px;text-align:center;color:var(--cyan);font-size:21px}
-#privacyModal h3{font-size:14px;color:#ffdc85;margin:18px 0 7px}
-#privacyModal p{font-size:12px;line-height:1.85;color:#c0cce0;margin:7px 0}
-#privacyModal a{color:#80eaff;overflow-wrap:anywhere}
-#privacyClose{display:block;margin:18px auto 0;padding:9px 24px;background:#28344b;border-color:#7385a5}
 /* CHALLENGE専用レイアウト */
+/* CHALLENGEも他モードと同じ「左ステータス・中央盤面・右ランキング」の3列 */
+
+#introDescription{margin:8px auto 14px;padding:11px 13px;max-width:420px;border:1px solid #405574;border-radius:11px;background:#111c2e;text-align:left}
+#introDescription h3{margin:0 0 6px;text-align:center;color:#8cecff;font-size:13px}
+#introDescription p{margin:5px 0;font-size:12px;line-height:1.65}
+#modeDescription{display:none;margin:10px auto 14px;max-width:430px;padding:13px;border:1px solid #526887;border-radius:12px;background:#101a2b;text-align:left}
+#modeDescription h3{margin:0 0 9px;text-align:center;color:#8cecff;font-size:17px}
+#modeDescription ul{margin:0;padding-left:20px;color:#c0cce0;font-size:13px;line-height:1.8}
+#modeDescription li{margin:4px 0}
+.detail-actions{display:flex;gap:9px;justify-content:center;margin-top:14px}
+.detail-actions button{min-width:105px;padding:11px 16px}
+#detailStartBtn{background:linear-gradient(135deg,#176c89,#244d78);border-color:#5ce6ff}
+#detailBackBtn{background:#28344b;border-color:#7385a5}
+#privacyLink{position:fixed;right:10px;bottom:max(8px,env(safe-area-inset-bottom));z-index:70;border:0;background:#101a2bdd;color:#8190aa;font-size:10px;font-weight:500;padding:5px 8px;min-width:0;text-decoration:underline;text-underline-offset:2px;border-radius:6px}
+#privacyLink:hover{color:#c5d5ef}
+
 body.challenge-mode main{justify-content:center;gap:clamp(7px,2vw,20px)}
 body.challenge-mode main>.side{width:clamp(66px,17vw,120px);gap:10px}
 body.challenge-mode main>.side:last-child{display:flex}
@@ -146,6 +154,16 @@ body.challenge-mode #hardDropBtn{background:linear-gradient(135deg,#176c89,#244d
  body.challenge-mode footer{gap:3px;padding-top:2px}
 }
 @media(max-height:600px){header{padding:3px 0}.subtitle{display:none}#challengeTracker{padding:3px 6px;margin:0 auto 2px}.tracker-title{margin-bottom:2px}#board{height:58dvh;width:min(38vw,calc(58dvh * .43))}.gauge-shell{height:105px}.side{gap:4px}.panel{padding:4px 3px}footer{gap:3px;padding-top:2px}button{padding:6px 8px}}
+
+#privacyOverlay{position:fixed;inset:0;z-index:80;background:#070b14ee;display:none;align-items:center;justify-content:center;padding:12px}
+#privacyOverlay.visible{display:flex}
+#privacyModal{width:min(680px,100%);max-height:calc(100dvh - 24px);overflow-y:auto;text-align:left;border:1px solid #4a5d7b;border-radius:16px;background:linear-gradient(160deg,#202e49,#151e30);padding:clamp(16px,4vw,26px);box-shadow:0 18px 60px #000b}
+#privacyModal h2{margin:0 0 16px;text-align:center;color:var(--cyan);font-size:21px}
+#privacyModal h3{font-size:14px;color:#ffdc85;margin:18px 0 7px}
+#privacyModal p{font-size:12px;line-height:1.85;color:#c0cce0;margin:7px 0}
+#privacyModal a{color:#80eaff;overflow-wrap:anywhere}
+#privacyClose{display:block;margin:18px auto 0;padding:9px 24px;background:#28344b;border-color:#7385a5}
+
 </style>
 </head>
 <body>
@@ -179,18 +197,27 @@ body.challenge-mode #hardDropBtn{background:linear-gradient(135deg,#176c89,#244d
 <button id="leftBtn">◀</button><button id="downBtn">▼</button><button id="rightBtn">▶</button><button id="hardDropBtn">一番下まで</button><button id="blastBtn" disabled>✦ 爆発 [ENTER]</button>
 </div>
 <div class="controls"><button id="startBtn">START / RESTART</button></div>
-<button id="privacyLink" type="button">プライバシーポリシー</button>
 </footer>
 <div id="bingoFX"><div class="bingo-label">BINGO!!</div></div>
 <div id="overlay"><div class="modal">
 <h2 id="overlayTitle">SUM CHAIN</h2>
 <p id="overlayText">プレイするモードを選んでね。<br>スペースキーで一気に落下。</p>
+<div id="introDescription">
+ <h3>ゲームの遊び方</h3>
+ <p>落ちてくる数字ブロックを左右に動かし、縦または横の合計が<strong>10</strong>になる列を作ろう。</p>
+ <p>ブロックを消すとスコア獲得。連続して消すと<strong>CHAIN BONUS</strong>で得点アップ！</p>
+ <p><strong>HOLD</strong>でブロックを一時保管し、<strong>NEXT</strong>で次に落ちてくる数字を確認できるよ。</p>
+ <p>モードを選んで、ランキング上位を目指そう！</p>
+</div>
+<div id="modeDescription"><h3 id="modeDescriptionTitle"></h3><ul id="modeDescriptionList"></ul><div class="detail-actions"><button id="detailBackBtn" type="button">戻る</button><button id="detailStartBtn" type="button">スタート</button></div></div>
 <div id="resultRanking"><h3>現在のランキング</h3><ol id="resultRankList"></ol></div>
 <div id="playerNameSetup"><label for="playerNameInput">プレイヤー名（最初に一度だけ登録）</label><input id="playerNameInput" maxlength="12" placeholder="名前を入力" autocomplete="nickname"><button id="playerNameSave">名前を登録する</button><div id="playerNameStatus"></div></div>
 <div class="mode-buttons" id="modeButtons"><button id="normalModeBtn">NORMAL</button><button id="challengeModeBtn">CHALLENGE</button><button id="speedModeBtn">SPEED</button><button id="superModeBtn">SUPER SPEED</button></div>
 <button id="overlayBtn" style="display:none">もう一度プレイ</button><button id="modeSelectBtn">モード選択へ</button>
 </div></div>
 
+
+<button id="privacyLink" type="button">🔒 プライバシーポリシー</button>
 <div id="privacyOverlay" aria-hidden="true">
  <section id="privacyModal" role="dialog" aria-modal="true" aria-labelledby="privacyTitle">
   <h2 id="privacyTitle">🔒 プライバシーポリシー</h2>
@@ -232,6 +259,8 @@ const W=4,H=10,$=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTim
 const boardEl=$("board"),cells=[],board=Array.from({length:H},()=>Array(W).fill(0));
 let piece=null,hold=null,holdUsed=false,queue=[],score=0,best=0;
 let selectedMode="normal";
+let playerName="";
+let currentRecordId=null;
 let running=false,paused=false,gameOver=false,resolving=false;
 let challengeTimeLeft=180000;
 const challengeCompletedTargets=new Set();
@@ -242,10 +271,12 @@ const CHARGE_MAX=100,LOCK_DELAY=600,MAX_GROUNDED_TIME=3000,TIME_CHARGE_PER_SECON
 const CLEAR_ANIMATION=280,FALL_ANIMATION=230;
 
 for(let y=0;y<H;y++)for(let x=0;x<W;x++){
- const el=document.createElement("div");el.className="cell";el.dataset.x=x;el.dataset.y=y;boardEl.appendChild(el);cells.push(el);
+ const el=document.createElement("div");el.className="cell";el.dataset.x=x;el.dataset.y=y;
+ boardEl.appendChild(el);cells.push(el);
 }
 const activeEl=document.createElement("div");activeEl.className="active";activeEl.style.display="none";boardEl.appendChild(activeEl);
 
+// モード別の出現確率
 function randomNumber(){
  const values=[1,2,3,4,5,6,7,8,9];
  const weights=selectedMode==="challenge"?[1,1,1,1,1,1,1,1,1]:[6,10,13,14,14,14,13,10,6];
@@ -277,96 +308,82 @@ function render(){
   activeEl.style.height="10%";activeEl.className="active n"+piece.value;
   activeEl.textContent=piece.value;
  }else activeEl.style.display="none";
- $("score").textContent=score.toLocaleString();$("best").textContent=Math.max(best,score).toLocaleString();
+ $("score").textContent=score.toLocaleString();$("best").textContent=best.toLocaleString();
  $("holdDisplay").textContent=hold??"—";
- $("nextDisplay").innerHTML=queue.slice(0,3).map(v=>`<div class="score n${v}" style="border-radius:5px;padding:3px;background:#182033">${v}</div>`).join("");
- $("gaugeFill").style.height=charge+"%";$("chargeText").textContent=Math.floor(charge)+"%";
- $("gaugeShell").classList.toggle("ready",charge>=CHARGE_MAX);
- $("readyText").textContent=charge>=CHARGE_MAX?"READY!":"CHARGING...";
- $("readyText").classList.toggle("ready",charge>=CHARGE_MAX);
- $("blastBtn").disabled=charge<CHARGE_MAX||!running||paused;
- $("blastBtn").classList.toggle("ready",charge>=CHARGE_MAX&&running&&!paused);
- renderRanking();
+ $("holdBtn").disabled=!running||paused||resolving||holdUsed||!piece;
+ $("nextDisplay").innerHTML=queue.slice(0,3).map(v=>`<div class="score" style="font-size:19px">${v}</div>`).join("");
+ updateGauge();renderRanking();
 }
-function setMessage(text,duration=0){
- $("message").textContent=text;
- if(messageTimer)clearTimeout(messageTimer);
- if(duration)messageTimer=setTimeout(()=>{$("message").textContent="合計10を作って連鎖を狙おう！"},duration);
+function updateGauge(){
+ const pct=Math.min(100,charge),ready=charge>=CHARGE_MAX;
+ $("gaugeFill").style.height=pct+"%";$("chargeText").textContent=Math.floor(pct)+"%";
+ $("gaugeShell").classList.toggle("ready",ready);$("blastBtn").classList.toggle("ready",ready);
+ $("blastBtn").disabled=!ready||!running||paused||resolving||!piece;
+ $("readyText").textContent=ready?"READY!":"CHARGING...";
+ $("readyText").classList.toggle("ready",ready);
 }
-function canMove(x,y){
- return x>=0&&x<W&&y>=0&&y<H&&board[y][x]===0;
+function setMessage(text,ms=1500){
+ $("message").textContent=text;if(messageTimer)clearTimeout(messageTimer);
+ if(ms)messageTimer=setTimeout(()=>{if(running&&!paused)$("message").textContent=selectedMode==="challenge"?"合計20〜90を狙って高得点！":"合計10を作って連鎖を狙おう！"},ms);
 }
+function canMove(x,y){return x>=0&&x<W&&y>=0&&y<H&&board[y][x]===0}
 function move(dx,dy){
  if(!running||paused||resolving||!piece)return;
- if(canMove(piece.x+dx,piece.y+dy)){
-  piece.x+=dx;piece.y+=dy;fallTimer=0;
-  if(groundedY!==-1&&piece.y!==groundedY){groundedTimer=0;groundedY=-1;lockTimer=0}
-  render();
- }
+ const nx=piece.x+dx,ny=piece.y+dy;
+ if(canMove(nx,ny)){piece.x=nx;piece.y=ny;lockTimer=0;fallTimer=0;render()}
+ else if(dy===1)lockTimer=Math.max(lockTimer,1);
 }
 function holdPiece(){
  if(!running||paused||resolving||!piece||holdUsed)return;
  const current=piece.value;
- if(hold===null){hold=current;spawnPiece()}
- else{piece.value=hold;hold=current}
- holdUsed=true;render();
-}
-function findAllMatches(){
- const found=new Map();
- let target=0;
- for(let y=0;y<H;y++){
-  for(let x=0;x<W;x++){
-   let sum=0,group=[];
-   for(let xx=x;xx<W;xx++){
-    if(!board[y][xx])break;
-    sum+=board[y][xx];group.push([xx,y]);
-    if(sum===10||selectedMode==="challenge"&&sum>=10&&sum<=90&&sum%10===0){
-     if(group.length>1){for(const p of group)found.set(p.join(","),p);target=sum}
-    }
-    if(sum>90)break;
-   }
-  }
- }
- for(let x=0;x<W;x++){
-  for(let y=0;y<H;y++){
-   let sum=0,group=[];
-   for(let yy=y;yy<H;yy++){
-    if(!board[yy][x])break;
-    sum+=board[yy][x];group.push([x,yy]);
-    if(sum===10||selectedMode==="challenge"&&sum>=10&&sum<=90&&sum%10===0){
-     if(group.length>1){for(const p of group)found.set(p.join(","),p);target=sum}
-    }
-    if(sum>90)break;
-   }
-  }
- }
- return {cells:[...found.values()],target};
+ if(hold===null){hold=current;spawnPiece()}else{piece.value=hold;hold=current}
+ holdUsed=true;lockTimer=0;render();
 }
 function compactBoard(){
  for(let x=0;x<W;x++){
   let write=H-1;
-  for(let y=H-1;y>=0;y--){
-   if(board[y][x]!==0){board[write][x]=board[y][x];if(write!==y)board[y][x]=0;write--}
+  for(let y=H-1;y>=0;y--)if(board[y][x]!==0){
+   const v=board[y][x];board[y][x]=0;board[write][x]=v;write--;
   }
   for(let y=write;y>=0;y--)board[y][x]=0;
  }
 }
-function addCharge(combo){
- if(selectedMode==="challenge")return;
- charge=Math.min(CHARGE_MAX,charge+combo*12);
- updateGauge();
+
+// モードごとに許可された合計だけを消去対象にする
+function findAllMatches(){
+ const matched=new Set();let biggestTarget=0;
+ const allowedTargets=selectedMode==="challenge"?[10,20,30,40,50,60,70,80,90]:[10];
+ const addSegment=(coords,sum)=>{
+  if(coords.length<2||!allowedTargets.includes(sum))return;
+  biggestTarget=Math.max(biggestTarget,sum);
+  for(const [x,y] of coords)matched.add(`${x},${y}`);
+ };
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+  if(!board[y][x])continue;
+  let sum=0,coords=[];
+  for(let xx=x;xx<W;xx++){
+   if(!board[y][xx])break;
+   sum+=board[y][xx];coords.push([xx,y]);addSegment(coords,sum);
+   if(sum>90)break;
+  }
+ }
+ for(let x=0;x<W;x++)for(let y=0;y<H;y++){
+  if(!board[y][x])continue;
+  let sum=0,coords=[];
+  for(let yy=y;yy<H;yy++){
+   if(!board[yy][x])break;
+   sum+=board[yy][x];coords.push([x,yy]);addSegment(coords,sum);
+   if(sum>90)break;
+  }
+ }
+ return {cells:[...matched].map(k=>k.split(",").map(Number)),target:biggestTarget};
 }
-function updateGauge(){
- $("gaugeFill").style.height=charge+"%";$("chargeText").textContent=Math.floor(charge)+"%";
- $("gaugeShell").classList.toggle("ready",charge>=CHARGE_MAX);
- $("readyText").textContent=charge>=CHARGE_MAX?"READY!":"CHARGING...";
- $("readyText").classList.toggle("ready",charge>=CHARGE_MAX);
- $("blastBtn").disabled=charge<CHARGE_MAX||!running||paused;
- $("blastBtn").classList.toggle("ready",charge>=CHARGE_MAX&&running&&!paused);
-}
-function showCombo(combo){
- const el=$("combo");el.textContent=combo+" CHAIN!";
+function addCharge(combo){charge=Math.min(CHARGE_MAX,charge+2.5*combo*combo);updateGauge()}
+function showCombo(n){
+ if(n<2)return;
+ const el=$("combo");el.textContent=`${n} COMBO!`;
  el.classList.remove("show");void el.offsetWidth;el.classList.add("show");
+ setMessage(`${n}コンボ！ CHAIN BONUS ×${n}`,1000);
 }
 function playTone(freq,duration,type="sine",volume=.04,delay=0){
  try{
@@ -381,6 +398,7 @@ function playTone(freq,duration,type="sine",volume=.04,delay=0){
  }catch(e){}
 }
 function playClearSound(combo){
+ // NORMAL / SPEED：連鎖の邪魔をしない、短く控えめな消去音
  const pitch=420+Math.min(combo-1,5)*45;
  playTone(pitch,.075,"sine",.018);
  playTone(pitch*1.45,.095,"sine",.012,.035);
@@ -430,23 +448,27 @@ function updateChallengeTimer(){
  el.classList.toggle("critical",seconds<=10);
 }
 function showJudgement(target){
- const word=JUDGEMENTS[target];if(!word)return;
- const el=$("judgement");el.classList.remove("make-ten");
- el.innerHTML=`<span class="judge-number" style="font-size:clamp(30px,8vw,54px)">MAKE ${target}!</span><span class="make-label">${word}</span>`;
+ const word=JUDGEMENTS[target];
+ if(!word)return;
+ const el=$("judgement");el.classList.remove("make-ten");el.innerHTML=`<span class="judge-number" style="font-size:clamp(30px,8vw,54px)">MAKE ${target}!</span><span class="make-label">${word}</span>`;
  el.classList.remove("show");void el.offsetWidth;el.classList.add("show");
 }
 function showMakeTen(){
- const el=$("judgement");el.classList.add("make-ten");
+ const el=$("judgement");
+ el.classList.add("make-ten");
  el.innerHTML='<span class="make-ten-word">MAKE 10!</span>';
  el.classList.remove("show");void el.offsetWidth;el.classList.add("show");
  setTimeout(()=>el.classList.remove("make-ten"),1100);
 }
 function playJudgementSound(target){
  const level=Math.max(2,Math.min(9,target/10)),base=300+level*45;
- playTone(base,.16,"triangle",.055);playTone(base*1.25,.2,"sine",.045,.07);playTone(base*1.5,.28,"sine",.035,.14);
+ playTone(base,.16,"triangle",.055);
+ playTone(base*1.25,.2,"sine",.045,.07);
+ playTone(base*1.5,.28,"sine",.035,.14);
  if(level>=6)playTone(base*2,.32,"triangle",.025,.2);
 }
 function playExplosionSound(){
+ // 低音の衝撃、下降する爆風、金属的な高音を重ねた大規模爆発音
  try{
   audioCtx ||=new(window.AudioContext||window.webkitAudioContext)();
   if(audioCtx.state==="suspended")audioCtx.resume();
@@ -455,14 +477,17 @@ function playExplosionSound(){
   boom.type="sawtooth";boom.frequency.setValueAtTime(115,now);boom.frequency.exponentialRampToValueAtTime(34,now+.72);
   boomGain.gain.setValueAtTime(.0001,now);boomGain.gain.exponentialRampToValueAtTime(.22,now+.025);boomGain.gain.exponentialRampToValueAtTime(.0001,now+.85);
   boom.connect(boomGain);boomGain.connect(audioCtx.destination);boom.start(now);boom.stop(now+.88);
+
   const impact=audioCtx.createOscillator(),impactGain=audioCtx.createGain();
   impact.type="triangle";impact.frequency.setValueAtTime(520,now+.015);impact.frequency.exponentialRampToValueAtTime(62,now+.38);
   impactGain.gain.setValueAtTime(.0001,now);impactGain.gain.exponentialRampToValueAtTime(.12,now+.018);impactGain.gain.exponentialRampToValueAtTime(.0001,now+.48);
   impact.connect(impactGain);impactGain.connect(audioCtx.destination);impact.start(now);impact.stop(now+.5);
+
   const shimmer=audioCtx.createOscillator(),shimmerGain=audioCtx.createGain();
   shimmer.type="sine";shimmer.frequency.setValueAtTime(1250,now+.08);shimmer.frequency.exponentialRampToValueAtTime(240,now+.9);
   shimmerGain.gain.setValueAtTime(.0001,now);shimmerGain.gain.exponentialRampToValueAtTime(.045,now+.09);shimmerGain.gain.exponentialRampToValueAtTime(.0001,now+1.05);
   shimmer.connect(shimmerGain);shimmerGain.connect(audioCtx.destination);shimmer.start(now);shimmer.stop(now+1.08);
+
   const length=Math.floor(audioCtx.sampleRate*.65),buffer=audioCtx.createBuffer(1,length,audioCtx.sampleRate),data=buffer.getChannelData(0);
   for(let i=0;i<length;i++){const envelope=Math.pow(1-i/length,2);data[i]=(Math.random()*2-1)*envelope;}
   const noise=audioCtx.createBufferSource(),filter=audioCtx.createBiquadFilter(),noiseGain=audioCtx.createGain();
@@ -481,13 +506,14 @@ async function resolveClears(){
    combo++;maxCombo=Math.max(maxCombo,combo);$("chainDisplay").textContent=maxCombo;
    clearAnimation(group);if(combo>=2)showCombo(combo);
    if(selectedMode==="challenge"&&JUDGEMENTS[match.target]){showJudgement(match.target);playJudgementSound(match.target)}
-   else{if(match.target===10)showMakeTen();playClearSound(combo)}
+   else{if(match.target===10)showMakeTen();playClearSound(combo);}
    await sleep(CLEAR_ANIMATION);
-   for(const [x,y] of group)board[y][x]=0;
+   let clearedValue=0;for(const [x,y] of group){clearedValue+=board[y][x];board[y][x]=0}
    clearCells.clear();totalCleared+=group.length;
-   if(selectedMode==="challenge"){score+=(CHALLENGE_POINTS[match.target]||10)*combo;registerChallengeTarget(match.target)}
+   if(selectedMode==="challenge"){score+=(CHALLENGE_POINTS[match.target]||10)*combo;registerChallengeTarget(match.target);}
    else score+=group.length*10*combo;
-   addCharge(combo);compactBoard();render();await sleep(FALL_ANIMATION);
+   addCharge(combo);
+   compactBoard();render();await sleep(FALL_ANIMATION);
   }
   if(totalCleared>0){
    if(selectedMode!=="challenge")score+=totalCleared*5;render();
@@ -495,220 +521,22 @@ async function resolveClears(){
   }
  }finally{clearCells.clear();resolving=false;render()}
 }
-async function lockPiece(){
+function lockPiece(){
  if(!piece||resolving||!running||paused)return;
  const {x,y,value}=piece;
  if(y<0||board[y][x]!==0){endGame();return}
  board[y][x]=value;piece=null;lockTimer=0;groundedTimer=0;groundedY=-1;render();
- await resolveClears();
- if(!running||gameOver)return;
- if(board[0].some(v=>v!==0)){endGame();return}
- spawnPiece();
+ resolveClears().then(()=>{
+  if(!running||gameOver)return;
+  if(board[0].some(v=>v!==0)){endGame();return}
+  spawnPiece();
+ });
 }
 function explosionShape(cx,cy){
- return [[cx,cy],[cx-1,cy-1],[cx,cy-1],[cx+1,cy-1],[cx-1,cy],[cx+1,cy],[cx-1,cy+1],[cx,cy+1],[cx+1,cy+1],[cx,cy-2],[cx,cy+2],[cx-2,cy],[cx+2,cy]].filter(([x,y])=>x>=0&&x<W&&y>=0&&y<H);
+ // 周囲12マスに加えて、中心の落下ブロックも爆発で消す
+ return [[cx,cy],[cx-1,cy-1],[cx,cy-1],[cx+1,cy-1],[cx-1,cy],[cx+1,cy],
+ [cx-1,cy+1],[cx,cy+1],[cx+1,cy+1],[cx,cy-2],[cx,cy+2],[cx-2,cy],[cx+2,cy]]
+ .filter(([x,y])=>x>=0&&x<W&&y>=0&&y<H);
 }
 async function explode(){
  if(!running||paused||resolving||!piece||charge<CHARGE_MAX)return;
- resolving=true;charge=0;updateGauge();
- const cx=piece.x,cy=piece.y,targets=explosionShape(cx,cy);
- const fx=$("explosionFX"),px=(cx+.5)/W*100,py=(cy+.5)/H*100;
- blastCells=new Set(targets.map(([x,y])=>`${x},${y}`));fx.innerHTML="";
- const flash=document.createElement("div");flash.className="blast-flash";
- flash.style.setProperty("--cx",px+"%");flash.style.setProperty("--cy",py+"%");fx.appendChild(flash);
- for(const type of ["blast-ring outer","blast-ring","blast-ring inner"]){
-  const ring=document.createElement("div");ring.className=type;ring.style.left=px+"%";ring.style.top=py+"%";fx.appendChild(ring);
- }
- const particleColors=["#fffbd0","#ffe36e","#ff9d35","#ff5b2e","#b8f7ff"];
- for(let i=0;i<30;i++){
-  const angle=Math.PI*2*i/30+(Math.random()-.5)*.16,distance=55+Math.random()*115;
-  const particle=document.createElement("div");particle.className="blast-particle";
-  particle.style.setProperty("--x",px+"%");particle.style.setProperty("--y",py+"%");
-  particle.style.setProperty("--dx",Math.cos(angle)*distance+"px");particle.style.setProperty("--dy",Math.sin(angle)*distance+"px");
-  particle.style.setProperty("--size",(3+Math.random()*6)+"px");particle.style.setProperty("--color",particleColors[i%particleColors.length]);
-  particle.style.animationDelay=(Math.random()*.09)+"s";fx.appendChild(particle);
- }
- boardEl.classList.remove("shake");void boardEl.offsetWidth;boardEl.classList.add("shake");
- playExplosionSound();setMessage("✦ MEGA EXPLOSION!!",1500);render();activeEl.classList.add("blast-center");await sleep(680);
- let removed=1;
- for(const [x,y] of targets){if(x===cx&&y===cy)continue;if(board[y][x]!==0){board[y][x]=0;removed++}}
- piece=null;activeEl.classList.remove("blast-center");blastCells.clear();fx.innerHTML="";compactBoard();
- score+=removed*15;render();await sleep(FALL_ANIMATION);resolving=false;
- await resolveClears();
- if(running&&!gameOver){if(board[0].some(v=>v!==0)){endGame();return}setMessage(`爆発！ ${removed}マスを消去`);spawnPiece();render()}
-}
-function startGame(mode=selectedMode){
- selectedMode=mode;document.body.classList.toggle("challenge-mode",selectedMode==="challenge");
- $("subtitle").textContent=selectedMode==="challenge"?"CHALLENGE · SUM 10–90 · 3 MIN TIME ATTACK":selectedMode==="super"?"SUPER SPEED · 100MS START · KEEP ACCELERATING":selectedMode==="speed"?"SPEED · FAST START · KEEP ACCELERATING":"NORMAL · SUM 10 · CONNECT · CLEAR · CHAIN";
- renderRanking();$("overlay").classList.add("hidden");$("modeButtons").style.display="none";$("overlayBtn").style.display="none";$("modeSelectBtn").style.display="none";$("resultRanking").classList.remove("visible");
- init();running=true;paused=false;gameOver=false;challengeTimeLeft=180000;challengeCompletedTargets.clear();renderChallengeTracker();
- $("timerPanel").style.display=selectedMode==="challenge"?"block":"none";updateChallengeTimer();
- lastTime=performance.now();spawnPiece();setMessage("ゲーム開始！");requestAnimationFrame(loop);
-}
-function init(){
- for(let y=0;y<H;y++)board[y].fill(0);
- piece=null;hold=null;holdUsed=false;queue=[];score=0;charge=0;maxCombo=0;
- fallTimer=0;lockTimer=0;groundedTimer=0;groundedY=-1;fallInterval=750;resolving=false;
- clearCells.clear();blastCells.clear();challengeCompletedTargets.clear();renderChallengeTracker();gameOver=false;
- $("chainDisplay").textContent="0";render();
-}
-function endGame(reason="gameover"){
- running=false;paused=false;gameOver=true;piece=null;best=Math.max(best,score);saveRanking(score,selectedMode);render();
- $("overlayTitle").textContent=reason==="timeup"?"TIME UP!":"GAME OVER";
- $("overlayText").innerHTML=`${selectedMode==="challenge"?"CHALLENGE":selectedMode==="super"?"SUPER SPEED":selectedMode==="speed"?"SPEED":"NORMAL"}<br>SCORE: <b>${score.toLocaleString()}</b><br>最高コンボ: <b>${maxCombo}</b>${reason==="timeup"?"<br>3分間お疲れさま！":""}`;
- $("resultRanking").classList.add("visible");renderResultRanking();
- $("modeButtons").style.display="none";$("overlayBtn").style.display="inline-block";$("overlayBtn").textContent="このモードでもう一度";
- $("modeSelectBtn").style.display="inline-block";$("modeSelectBtn").textContent="別モードを選ぶ";$("overlay").classList.remove("hidden");
-}
-function togglePause(){
- if(!running||gameOver||resolving)return;
- paused=!paused;setMessage(paused?"一時停止中":"再開！");
- if(!paused){lastTime=performance.now();requestAnimationFrame(loop)}
-}
-function loop(now){
- if(!running||paused||gameOver)return;
- const dt=Math.min(now-lastTime,100);lastTime=now;
- if(selectedMode==="challenge"){
-  challengeTimeLeft=Math.max(0,challengeTimeLeft-dt);updateChallengeTimer();
-  if(challengeTimeLeft<=0&&!resolving){endGame("timeup");return}
- }
- if(!resolving&&piece){
-  charge=Math.min(CHARGE_MAX,charge+TIME_CHARGE_PER_SECOND*dt/1000);fallTimer+=dt;
-  if(selectedMode==="challenge"){
-   const elapsedTime=180000-challengeTimeLeft,timeLevel=Math.floor(elapsedTime/15000);
-   fallInterval=Math.max(160,750*Math.pow(.90,timeLevel));
-  }else{
-   const level=Math.floor(score/50),isFastMode=selectedMode==="speed"||selectedMode==="super";
-   const baseInterval=selectedMode==="super"?100:selectedMode==="speed"?200:750;
-   const acceleration=isFastMode?.89:.90;fallInterval=baseInterval*Math.pow(acceleration,level);
-  }
-  if(fallTimer>=fallInterval){fallTimer=0;if(canMove(piece.x,piece.y+1))piece.y++}
-  const grounded=!canMove(piece.x,piece.y+1);
-  if(!grounded){groundedTimer=0;groundedY=-1;lockTimer=0}
-  else{
-   if(groundedY!==piece.y){groundedY=piece.y;groundedTimer=0;lockTimer=0}
-   groundedTimer+=dt;lockTimer+=dt;
-   if(groundedTimer>=MAX_GROUNDED_TIME||lockTimer>=LOCK_DELAY)lockPiece();
-  }
-  render();
- }
- requestAnimationFrame(loop);
-}
-function hardDrop(){
- if(!running||paused||resolving||!piece)return;
- while(canMove(piece.x,piece.y+1))piece.y++;
- render();lockPiece();
-}
-function saveRanking(s,mode){
- try{
-  const key=`sum10chain-ranks-${mode}`;
-  const oldScores=mode==="normal"?JSON.parse(localStorage.getItem("sum10chain-ranks")||"[]"):[];
-  const scores=JSON.parse(localStorage.getItem(key)||JSON.stringify(oldScores));
-  scores.push(s);scores.sort((a,b)=>b-a);localStorage.setItem(key,JSON.stringify(scores.slice(0,5)));
- }catch(e){}
-}
-function getRankingScores(mode=selectedMode){
- try{
-  const saved=localStorage.getItem(`sum10chain-ranks-${mode}`);
-  return JSON.parse(saved||(mode==="normal"?localStorage.getItem("sum10chain-ranks"):"[]")||"[]");
- }catch(e){return []}
-}
-function renderRanking(){
- const scores=getRankingScores();$("rankList").innerHTML="";
- if(!scores.length){$("rankList").innerHTML="<li>—</li>";return}
- scores.slice(0,5).forEach(s=>{const li=document.createElement("li");li.textContent=s.toLocaleString();$("rankList").appendChild(li)});
-}
-function renderResultRanking(){
- const scores=getRankingScores(),list=$("resultRankList");list.innerHTML="";
- if(!scores.length){list.innerHTML="<li>まだ記録がありません</li>";return}
- scores.slice(0,5).forEach((value,index)=>{
-  const li=document.createElement("li");li.textContent=value.toLocaleString();
-  if(index===scores.indexOf(score))li.classList.add("current-score");list.appendChild(li);
- });
-}
-function loadPlayerName(){try{return localStorage.getItem("sum10chain-player-name")||""}catch(e){return ""}}
-let playerName="";
-function refreshPlayerNameUI(){
- const setup=$("playerNameSetup"),input=$("playerNameInput"),status=$("playerNameStatus"),save=$("playerNameSave");
- if(playerName){input.value=playerName;input.disabled=true;save.style.display="none";status.textContent="登録済み："+playerName}
- else{input.disabled=false;save.style.display="block";status.textContent="";}
-}
-function ensurePlayerName(){
- if(playerName)return true;
- const input=$("playerNameInput"),name=input.value.trim().replace(/[<>]/g,"").slice(0,12);
- if(!name){$("playerNameStatus").textContent="プレイヤー名を入力してね。";input.focus();return false}
- playerName=name;
- try{localStorage.setItem("sum10chain-player-name",playerName)}catch(e){}
- refreshPlayerNameUI();return true;
-}
-function saveNamedRanking(s,mode){
- try{
-  const key=`sum10chain-named-ranks-${mode}`,records=JSON.parse(localStorage.getItem(key)||"[]");
-  const id=Date.now().toString(36)+Math.random().toString(36).slice(2,7);
-  records.push({name:playerName||"PLAYER",score:s,id});
-  records.sort((a,b)=>b.score-a.score);localStorage.setItem(key,JSON.stringify(records.slice(0,5)));
- }catch(e){}
-}
-function renderNamedRanking(){
- const key=`sum10chain-named-ranks-${selectedMode}`;
- let records=[];try{records=JSON.parse(localStorage.getItem(key)||"[]")}catch(e){}
- const list=$("rankList");list.innerHTML="";
- if(!records.length){list.innerHTML="<li>—</li>";return}
- records.slice(0,5).forEach(r=>{const li=document.createElement("li");li.textContent=`${r.name}: ${r.score.toLocaleString()}`;list.appendChild(li)});
-}
-$("playerNameSave").addEventListener("click",()=>{if(ensurePlayerName())setMessage("プレイヤー名を登録したよ！ モードを選んでね。",2200)});
-$("playerNameInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("playerNameSave").click()});
-playerName=loadPlayerName();refreshPlayerNameUI();
-
-const privacyOverlay=$("privacyOverlay");
-function closePrivacy(){privacyOverlay.classList.remove("visible");privacyOverlay.setAttribute("aria-hidden","true")}
-$("privacyLink").addEventListener("click",()=>{privacyOverlay.classList.add("visible");privacyOverlay.setAttribute("aria-hidden","false")});
-$("privacyClose").addEventListener("click",closePrivacy);
-privacyOverlay.addEventListener("click",e=>{if(e.target===privacyOverlay)closePrivacy()});
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closePrivacy()});
-
-$("leftBtn").addEventListener("click",()=>move(-1,0));
-$("rightBtn").addEventListener("click",()=>move(1,0));
-$("downBtn").addEventListener("click",()=>{
- if(!running||paused||resolving||!piece)return;
- if(canMove(piece.x,piece.y+1)){piece.y++;lockTimer=0;fallTimer=0;render()}
- else lockTimer=Math.max(lockTimer,1);
-});
-$("hardDropBtn").addEventListener("click",hardDrop);
-$("holdBtn").addEventListener("click",holdPiece);
-$("blastBtn").addEventListener("click",explode);
-$("startBtn").addEventListener("click",()=>startGame(selectedMode));
-$("overlayBtn").addEventListener("click",()=>startGame(selectedMode));
-$("normalModeBtn").addEventListener("click",()=>startGame("normal"));
-$("challengeModeBtn").addEventListener("click",()=>startGame("challenge"));
-$("speedModeBtn").addEventListener("click",()=>startGame("speed"));
-$("superModeBtn").addEventListener("click",()=>startGame("super"));
-$("modeSelectBtn").addEventListener("click",()=>{
- running=false;paused=false;piece=null;selectedMode="normal";document.body.classList.remove("challenge-mode");
- $("overlayTitle").textContent="SUM CHAIN";
- $("overlayText").innerHTML="プレイするモードを選んでね。<br>スペースキーで一気に落下。";
- $("resultRanking").classList.remove("visible");
- $("modeButtons").style.display="flex";$("overlayBtn").style.display="none";$("modeSelectBtn").style.display="none";
- $("overlay").classList.remove("hidden");render();
-});
-document.addEventListener("keydown",e=>{
- if(["ArrowLeft","ArrowRight","ArrowDown","ArrowUp","Enter"," "].includes(e.key))e.preventDefault();
- if(e.repeat&&["Enter"," ","c","C","ArrowUp"].includes(e.key))return;
- if(e.key==="ArrowLeft"||e.key==="a"||e.key==="A")move(-1,0);
- else if(e.key==="ArrowRight"||e.key==="d"||e.key==="D")move(1,0);
- else if(e.key==="ArrowDown"||e.key==="s"||e.key==="S"){
-  if(running&&!paused&&!resolving&&piece&&canMove(piece.x,piece.y+1)){piece.y++;lockTimer=0;fallTimer=0;render()}
- }else if(e.key==="c"||e.key==="C"||e.key==="Shift"||e.key==="ArrowUp")holdPiece();
- else if(e.key==="Enter"){if(running&&!paused&&charge>=CHARGE_MAX)explode()}
- else if(e.code==="Space"){hardDrop()}
-});
-for(const [id,dx] of [["leftBtn",-1],["rightBtn",1]]){
- let repeatId;const btn=$(id);
- btn.addEventListener("pointerdown",()=>{repeatId=setInterval(()=>move(dx,0),130)});
- for(const ev of ["pointerup","pointerleave","pointercancel"])btn.addEventListener(ev,()=>clearInterval(repeatId));
-}
-render();
-})();
-</script>
-</body>
-</html>
