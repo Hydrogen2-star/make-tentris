@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -15,7 +16,7 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MAKE 10TRIS</title>
+<title>Make 10tris</title>
 <style>
 :root{--bg:#101522;--line:#35425c;--cyan:#50e7ff;--gold:#ffd166}
 *{box-sizing:border-box}
@@ -179,7 +180,7 @@ body.challenge-mode #hardDropBtn{background:linear-gradient(135deg,#176c89,#244d
 </head>
 <body>
 <header>
-<h1>MAKE 10 <span style="color:white">TRIS</span></h1>
+<h1>Make 10tris</h1>
 <div class="subtitle" id="subtitle">CONNECT · CLEAR · CHAIN · EXPLODE</div>
 </header>
 <div id="challengeTracker"><div class="tracker-title">CHALLENGE BINGO · MAKE ALL 9</div><div class="tracker-items" id="challengeTrackerItems"></div></div>
@@ -207,11 +208,10 @@ body.challenge-mode #hardDropBtn{background:linear-gradient(135deg,#176c89,#244d
 <div class="controls">
 <button id="leftBtn">◀</button><button id="downBtn">▼</button><button id="rightBtn">▶</button><button id="hardDropBtn">一番下まで</button><button id="blastBtn" disabled>✦ 爆発 [ENTER]</button>
 </div>
-<div class="controls"><button id="startBtn">START / RESTART</button></div>
 </footer>
 <div id="bingoFX"><div class="bingo-label">BINGO!!</div></div>
 <div id="overlay"><div class="modal">
-<h2 id="overlayTitle">SUM CHAIN</h2>
+<h2 id="overlayTitle">Make 10tris</h2>
 <p id="overlayText">プレイするモードを選んでね。<br>スペースキーで一気に落下。</p>
 <div id="introDescription">
  <h3>ゲームの遊び方</h3>
@@ -271,7 +271,7 @@ let piece=null,hold=null,holdUsed=false,queue=[],score=0,best=0;
 let selectedMode="normal";
 let playerName="";
 let currentRecordId=null;
-let running=false,paused=false,gameOver=false,resolving=false;
+let running=false,gameOver=false,resolving=false;
 let challengeTimeLeft=180000;
 const challengeCompletedTargets=new Set();
 const CHALLENGE_BINGO_BONUS=1000000;
@@ -320,7 +320,7 @@ function render(){
  }else activeEl.style.display="none";
  $("score").textContent=score.toLocaleString();$("best").textContent=best.toLocaleString();
  $("holdDisplay").textContent=hold??"—";
- $("holdBtn").disabled=!running||paused||resolving||holdUsed||!piece;
+ $("holdBtn").disabled=!running||resolving||holdUsed||!piece;
  $("nextDisplay").innerHTML=queue.slice(0,3).map(v=>`<div class="score" style="font-size:19px">${v}</div>`).join("");
  updateGauge();renderRanking();
 }
@@ -328,23 +328,23 @@ function updateGauge(){
  const pct=Math.min(100,charge),ready=charge>=CHARGE_MAX;
  $("gaugeFill").style.height=pct+"%";$("chargeText").textContent=Math.floor(pct)+"%";
  $("gaugeShell").classList.toggle("ready",ready);$("blastBtn").classList.toggle("ready",ready);
- $("blastBtn").disabled=!ready||!running||paused||resolving||!piece;
+ $("blastBtn").disabled=!ready||!running||resolving||!piece;
  $("readyText").textContent=ready?"READY!":"CHARGING...";
  $("readyText").classList.toggle("ready",ready);
 }
 function setMessage(text,ms=1500){
  $("message").textContent=text;if(messageTimer)clearTimeout(messageTimer);
- if(ms)messageTimer=setTimeout(()=>{if(running&&!paused)$("message").textContent=selectedMode==="challenge"?"合計20〜90を狙って高得点！":"合計10を作って連鎖を狙おう！"},ms);
+ if(ms)messageTimer=setTimeout(()=>{if(running)$("message").textContent=selectedMode==="challenge"?"合計20〜90を狙って高得点！":"合計10を作って連鎖を狙おう！"},ms);
 }
 function canMove(x,y){return x>=0&&x<W&&y>=0&&y<H&&board[y][x]===0}
 function move(dx,dy){
- if(!running||paused||resolving||!piece)return;
+ if(!running||resolving||!piece)return;
  const nx=piece.x+dx,ny=piece.y+dy;
  if(canMove(nx,ny)){piece.x=nx;piece.y=ny;lockTimer=0;fallTimer=0;render()}
  else if(dy===1)lockTimer=Math.max(lockTimer,1);
 }
 function holdPiece(){
- if(!running||paused||resolving||!piece||holdUsed)return;
+ if(!running||resolving||!piece||holdUsed)return;
  const current=piece.value;
  if(hold===null){hold=current;spawnPiece()}else{piece.value=hold;hold=current}
  holdUsed=true;lockTimer=0;render();
@@ -532,7 +532,7 @@ async function resolveClears(){
  }finally{clearCells.clear();resolving=false;render()}
 }
 function lockPiece(){
- if(!piece||resolving||!running||paused)return;
+ if(!piece||resolving||!running)return;
  const {x,y,value}=piece;
  if(y<0||board[y][x]!==0){endGame();return}
  board[y][x]=value;piece=null;lockTimer=0;groundedTimer=0;groundedY=-1;render();
@@ -549,7 +549,7 @@ function explosionShape(cx,cy){
  .filter(([x,y])=>x>=0&&x<W&&y>=0&&y<H);
 }
 async function explode(){
- if(!running||paused||resolving||!piece||charge<CHARGE_MAX)return;
+ if(!running||resolving||!piece||charge<CHARGE_MAX)return;
   resolving=true;charge=0;updateGauge();
  const cx=piece.x,cy=piece.y,targets=explosionShape(cx,cy);
  const fx=$("explosionFX"),px=(cx+.5)/W*100,py=(cy+.5)/H*100;
@@ -594,7 +594,7 @@ function startGame(mode=selectedMode){
  $("subtitle").textContent=selectedMode==="challenge"?"CHALLENGE · SUM 10–90 · 3 MIN TIME ATTACK":selectedMode==="super"?"SUPER SPEED · 100MS START · KEEP ACCELERATING":selectedMode==="speed"?"SPEED · FAST START · KEEP ACCELERATING":"NORMAL · SUM 10 · CONNECT · CLEAR · CHAIN";
  renderRanking();
  $("overlay").classList.add("hidden");$("modeButtons").style.display="none";$("modeDescription").style.display="none";$("introDescription").style.display="none";$("overlayBtn").style.display="none";$("modeSelectBtn").style.display="none";$("resultRanking").classList.remove("visible");
- init();running=true;paused=false;gameOver=false;
+ init();running=true;gameOver=false;
  challengeTimeLeft=180000;challengeCompletedTargets.clear();renderChallengeTracker();$("timerPanel").style.display=selectedMode==="challenge"?"block":"none";updateChallengeTimer();
  lastTime=performance.now();spawnPiece();setMessage("ゲーム開始！");requestAnimationFrame(loop);
 }
@@ -605,21 +605,15 @@ function init(){
  clearCells.clear();blastCells.clear();challengeCompletedTargets.clear();renderChallengeTracker();gameOver=false;$("chainDisplay").textContent="0";render();
 }
 function endGame(reason="gameover"){
- running=false;paused=false;gameOver=true;piece=null;best=Math.max(best,score);currentRecordId=saveRanking(score,selectedMode);render();
+ running=false;gameOver=true;piece=null;best=Math.max(best,score);currentRecordId=saveRanking(score,selectedMode);render();
  $("overlayTitle").textContent=reason==="timeup"?"TIME UP!":"GAME OVER";
  $("overlayText").innerHTML=`${selectedMode==="challenge"?"CHALLENGE":selectedMode==="super"?"SUPER SPEED":selectedMode==="speed"?"SPEED":"NORMAL"}<br>SCORE: <b>${score.toLocaleString()}</b><br>最高コンボ: <b>${maxCombo}</b>${reason==="timeup"?"<br>3分間お疲れさま！":""}`;
  $("resultRanking").classList.add("visible");renderResultRanking();
  $("modeButtons").style.display="none";$("overlayBtn").style.display="inline-block";$("overlayBtn").textContent="このモードでもう一度";
  $("modeSelectBtn").style.display="inline-block";$("modeSelectBtn").textContent="別モードを選ぶ";$("overlay").classList.remove("hidden");
 }
-function togglePause(){
- if(!running||gameOver||resolving)return;
- paused=!paused;
- setMessage(paused?"一時停止中":"再開！");
- if(!paused){lastTime=performance.now();requestAnimationFrame(loop)}
-}
 function loop(now){
- if(!running||paused||gameOver)return;
+ if(!running||gameOver)return;
  const dt=Math.min(now-lastTime,100);lastTime=now;
  if(selectedMode==="challenge") {
   challengeTimeLeft=Math.max(0,challengeTimeLeft-dt);updateChallengeTimer();
@@ -663,7 +657,7 @@ function loop(now){
  requestAnimationFrame(loop);
 }
 function hardDrop(){
- if(!running||paused||resolving||!piece)return;
+ if(!running||resolving||!piece)return;
  while(canMove(piece.x,piece.y+1))piece.y++;
  render();
  lockPiece();
@@ -752,7 +746,7 @@ function showModeDescription(mode){
  $("detailBackBtn").onclick=showModeSelect;
 }
 function showModeSelect(){
- $("overlayTitle").textContent="MAKE 10TRIS";
+ $("overlayTitle").textContent="Make 10tris";
  $("overlayText").innerHTML="プレイするモードを選んでね。<br>スペースキーで一気に落下。";
  $("introDescription").style.display="block";
  $("modeDescription").style.display="none";
@@ -777,7 +771,6 @@ $("speedModeBtn").addEventListener("click",()=>showModeDescription("speed"));
 $("superModeBtn").addEventListener("click",()=>showModeDescription("super"));
 $("challengeModeBtn").addEventListener("click",()=>showModeDescription("challenge"));
 $("playerNameSave").addEventListener("click",ensurePlayerName);
-$("startBtn").addEventListener("click",()=>{if(!running)showModeSelect();else togglePause()});
 $("overlayBtn").addEventListener("click",()=>startGame(selectedMode));
 $("modeSelectBtn").addEventListener("click",showModeSelect);
 $("leftBtn").addEventListener("click",()=>move(-1,0));
@@ -793,11 +786,11 @@ window.addEventListener("keydown",e=>{
  if(e.key==="ArrowLeft"||e.key==="a"||e.key==="A")move(-1,0);
  else if(e.key==="ArrowRight"||e.key==="d"||e.key==="D")move(1,0);
  else if(e.key==="ArrowDown"||e.key==="s"||e.key==="S"){
-  if(running&&!paused&&!resolving&&piece&&canMove(piece.x,piece.y+1)){
+  if(running&&!resolving&&piece&&canMove(piece.x,piece.y+1)){
    piece.y++;lockTimer=0;fallTimer=0;render();
   }
  }else if(e.key==="c"||e.key==="C"||e.key==="Shift"||e.key==="ArrowUp")holdPiece();
- else if(e.key==="Enter"){if(running&&!paused&&charge>=CHARGE_MAX)explode()}
+ else if(e.key==="Enter"){if(running&&charge>=CHARGE_MAX)explode()}
  else if(e.code==="Space"){hardDrop()}
 });
 for(const [id,dx] of [["leftBtn",-1],["rightBtn",1]]){
