@@ -1,23 +1,22 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5680191738042379"
-     crossorigin="anonymous"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5680191738042379" crossorigin="anonymous"></script>
   <script async src="https://www.googletagmanager.com/gtm.js?id=G-5Y43V79R13"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
   </script>
-<script async src="https://www.googletagmanager.com/gtm.js?id=GTM-N8PDZ5W5"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-</script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Make 10tris</title>
+  <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-N8PDZ5W5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Make 10tris</title>
 <style>
 :root{--bg:#101522;--line:#35425c;--cyan:#50e7ff;--gold:#ffd166}
 *{box-sizing:border-box}
@@ -28,7 +27,7 @@ header{width:100%;text-align:center;padding:8px 0 4px;flex-shrink:0}
 .tracker-title{font-size:9px;letter-spacing:2px;color:#d9bd83;text-align:center;margin-bottom:5px;font-weight:900}
 .tracker-items{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:4px}
 .tracker-item{border:1px solid #3d3a3c;border-radius:6px;background:#11151e;color:#555d6c;text-align:center;padding:3px 0;font-size:clamp(11px,2.8vw,15px);font-weight:950;text-shadow:none;transition:all .25s}
-.tracker-item.lit{color:#fff3a5;border-color:#ffd166;background:linear-gradient(145deg,#795323,#33291d);box-shadow:0 0 9px #ffc44d88, inset 0 0 8px #ffe7a044;text-shadow:0 0 8px #ffe27a}
+.tracker-item.lit{color:#fff3a5;border-color:#ffd166;background:linear-gradient(145deg,#795323,#33291d);box-shadow:0 0 9px #ffc44d88,inset 0 0 8px #ffe7a044;text-shadow:0 0 8px #ffe27a}
 .tracker-item.reach{animation:trackerReach .65s ease-in-out infinite alternate}
 .tracker-item.bingo{animation:trackerBingo .45s ease-in-out 3}
 @keyframes trackerReach{to{transform:translateY(-3px) scale(1.07);box-shadow:0 0 18px #ffdc66;border-color:#fff4b0}}
@@ -88,7 +87,251 @@ main{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
 #superModeBtn{border-color:#c58bff;color:#d8b5ff}
 #modeSelectBtn{display:none;margin-top:8px}
 #hardDropBtn{font-size:12px;padding:10px 11px;background:#263650;border-color:#7385a5;white-space:nowrap}
-();renderRanking();
+@keyframes comboPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(-9deg)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.2) rotate(3deg)}38%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-80%) scale(.9)}}
+#board.shake{animation:shake .78s cubic-bezier(.25,.7,.3,1)}
+@keyframes shake{0%,100%{transform:translate(0,0) rotate(0)}10%{transform:translate(-7px,3px) rotate(-1deg)}20%{transform:translate(8px,-4px) rotate(1deg)}32%{transform:translate(-6px,2px) rotate(-.7deg)}45%{transform:translate(5px,-2px) rotate(.5deg)}60%{transform:translate(-3px,1px)}75%{transform:translate(2px,-1px)}}
+.cell.clearing{animation:clearCell .28s ease-out forwards}
+.cell.clearing.soft-clear{animation:softClearCell .28s ease-out forwards}
+@keyframes clearCell{45%{filter:brightness(3);transform:scale(1.12)}100%{opacity:0;transform:scale(.1)}}
+@keyframes softClearCell{0%{filter:brightness(1);transform:scale(1)}28%{background:#fff;color:#fff;filter:brightness(1.8);box-shadow:0 0 9px #fff9;transform:scale(1.035)}100%{opacity:0;transform:scale(.82)}}
+.cell.blast{animation:blastCell .42s ease-out forwards}
+@keyframes blastCell{30%{filter:brightness(4) saturate(0);background:white;transform:scale(1.08)}100%{filter:brightness(1.6)}}
+#explosionFX{position:absolute;inset:0;z-index:10;pointer-events:none}
+.blast-ring{position:absolute;width:22px;height:22px;border:4px solid #fffbd0;border-radius:50%;box-shadow:0 0 24px #fff,0 0 48px #ff9d35;transform:translate(-50%,-50%) scale(.2);animation:ring .78s cubic-bezier(.12,.65,.25,1) forwards}
+.blast-ring.outer{border-width:5px;border-color:#ffb347;box-shadow:0 0 18px #ff8c22,0 0 42px #ff5e24;animation-duration:1s}
+.blast-ring.inner{border-width:3px;border-color:#e9fcff;animation-duration:.55s}
+.blast-flash{position:absolute;inset:0;background:radial-gradient(circle at var(--cx) var(--cy),#fff 0%,#fffde0 8%,#ffbd55 20%,#ff6b2c55 42%,transparent 72%);opacity:0;animation:blastFlash .72s ease-out forwards}
+@keyframes blastFlash{0%{opacity:0}12%{opacity:1}35%{opacity:.78}100%{opacity:0}}
+.blast-particle{position:absolute;left:var(--x);top:var(--y);width:var(--size);height:var(--size);border-radius:50%;background:var(--color);box-shadow:0 0 8px var(--color),0 0 18px var(--color);animation:blastParticle .8s cubic-bezier(.1,.65,.2,1) forwards}
+@keyframes blastParticle{0%{opacity:1;transform:translate(-50%,-50%) scale(1.5)}75%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.08)}}
+.active.blast-center{animation:centerVanish .62s ease-out forwards;z-index:12}
+@keyframes centerVanish{0%{filter:brightness(1);transform:scale(1)}18%{filter:brightness(5);box-shadow:0 0 18px #fff,0 0 45px #ffb52e;transform:scale(1.35)}55%{filter:brightness(3);transform:scale(1.7) rotate(20deg)}100%{opacity:0;filter:brightness(3);transform:scale(.05) rotate(90deg)}}
+footer{flex-shrink:0;width:100%;padding:4px 8px max(6px,env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:5px}
+.controls{display:flex;gap:6px;justify-content:center;width:100%}
+button{border:1px solid #465570;border-radius:9px;background:#202c42;color:white;font-size:12px;font-weight:800;padding:8px 10px;min-width:44px;cursor:pointer;touch-action:manipulation}
+button:active{transform:scale(.96)}
+button:disabled{opacity:.35}
+#blastBtn{min-width:120px;background:#242b3a;color:#78849a;border:2px solid #39445a;font-size:13px}
+#blastBtn.ready{background:linear-gradient(135deg,#ff8b32,#ffd85d);color:#301707;border-color:#fff0a3;box-shadow:0 0 20px #ffb13c99;animation:pulse .7s infinite alternate}
+#holdBtn{color:#80eaff}
+#message{font-size:11px;color:#b5c3dd;min-height:14px;text-align:center}
+#overlay{position:fixed;inset:0;z-index:50;background:#070b14ef;display:flex;align-items:center;justify-content:center;padding:12px}
+#overlay.hidden{display:none}
+.modal{width:min(500px,100%);max-height:calc(100dvh - 24px);overflow-y:auto;border:1px solid #4a5d7b;border-radius:18px;background:linear-gradient(160deg,#202e49,#151e30);padding:clamp(16px,4vw,26px);text-align:center;box-shadow:0 18px 60px #000b}
+.modal h2{margin:0 0 10px;color:var(--cyan);font-size:clamp(23px,5vw,30px);letter-spacing:1px}
+.modal p{font-size:clamp(13px,2.8vw,16px);line-height:1.8;color:#c0cce0;margin:8px 0 14px}
+#resultRanking{display:none;margin:16px auto 18px;padding:14px 16px;max-width:400px;text-align:left;border:1px solid #526887;border-radius:12px;background:#0d1628}
+#resultRanking.visible{display:block}
+#resultRanking h3{margin:0 0 8px;text-align:center;font-size:14px;letter-spacing:2px;color:#ffdc85}
+#resultRankList{margin:0;padding:0;list-style:none;display:block;max-height:260px;overflow-y:auto;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+#resultRankList li{display:flex;align-items:center;gap:8px;padding:6px 8px;border-bottom:1px solid #2b3a53;min-height:34px}
+#resultRankList li .rank-number{width:28px;flex-shrink:0;color:#aab8d0}
+#resultRankList li .ranking-name{flex:1;min-width:0;font-size:12px}
+#resultRankList li .ranking-score{font-size:13px;white-space:nowrap}
+#resultRankList li.rank-gold{background:#59471c66;color:#ffe28a}
+#resultRankList li.rank-gold .rank-number{color:#ffd166}
+#resultRankList li.rank-silver .rank-number{color:#d9e3ef}
+#resultRankList li.rank-bronze .rank-number{color:#d99a68}
+#resultRankList li.current-score{outline:1px solid #ffe28a;background:#55432366}
+#currentRunRecord{margin-top:10px;padding:9px;border-top:1px solid #526887;text-align:center;color:#ffe28a;font-size:13px;font-weight:800}
+#rankingStatus{margin-top:5px;text-align:center;color:#9eabc5;font-size:11px}
+#overlayBtn,#modeSelectBtn{padding:12px 18px;font-size:14px;margin:4px}
+#overlayBtn{background:linear-gradient(135deg,#176c89,#244d78);border-color:#5ce6ff;color:#fff}
+#modeSelectBtn{background:#28344b;border-color:#7385a5;color:#e5edff}
+/* CHALLENGE専用レイアウト */
+/* CHALLENGEも他モードと同じ「左ステータス・中央盤面・右ランキング」の3列 */
+#introDescription{margin:8px auto 14px;padding:11px 13px;max-width:420px;border:1px solid #405574;border-radius:11px;background:#111c2e;text-align:left}
+#introDescription h3{margin:0 0 6px;text-align:center;color:#8cecff;font-size:13px}
+#introDescription p{margin:5px 0;font-size:12px;line-height:1.65}
+#modeDescription{display:none;margin:10px auto 14px;max-width:430px;padding:13px;border:1px solid #526887;border-radius:12px;background:#101a2b;text-align:left}
+#modeDescription h3{margin:0 0 9px;text-align:center;color:#8cecff;font-size:17px}
+#modeDescription ul{margin:0;padding-left:20px;color:#c0cce0;font-size:13px;line-height:1.8}
+#modeDescription li{margin:4px 0}
+.detail-actions{display:flex;gap:9px;justify-content:center;margin-top:14px}
+.detail-actions button{min-width:105px;padding:11px 16px}
+#detailStartBtn{background:linear-gradient(135deg,#176c89,#244d78);border-color:#5ce6ff}
+#detailBackBtn{background:#28344b;border-color:#7385a5}
+#privacyLink{position:fixed;right:10px;bottom:max(8px,env(safe-area-inset-bottom));z-index:70;border:0;background:#101a2bdd;color:#8190aa;font-size:10px;font-weight:500;padding:5px 8px;min-width:0;text-decoration:underline;text-underline-offset:2px;border-radius:6px}
+#privacyLink:hover{color:#c5d5ef}
+body.challenge-mode main{justify-content:center;gap:clamp(7px,2vw,20px)}
+body.challenge-mode main>.side{width:clamp(66px,17vw,120px);gap:10px}
+body.challenge-mode main>.side:last-child{display:flex}
+body.challenge-mode #powerPanel{display:none}
+body.challenge-mode #board{height:min(62dvh,620px);width:min(42vw,300px,calc(62dvh * .43))}
+body.challenge-mode #challengeTracker{width:min(520px,94vw);margin:2px auto 4px}
+body.challenge-mode footer{gap:6px;padding-top:5px}
+body.challenge-mode footer #message{display:none}
+body.challenge-mode #blastBtn{display:none}
+body.challenge-mode #hardDropBtn{background:linear-gradient(135deg,#176c89,#244d78);border-color:#50e7ff}
+@media(max-height:650px){
+ body.challenge-mode header{padding:2px 0}
+ body.challenge-mode #challengeTracker{padding:3px 6px;margin:0 auto 2px}
+ body.challenge-mode .tracker-title{margin-bottom:2px}
+ body.challenge-mode main>.side{gap:5px}
+ body.challenge-mode main>.side .panel{padding:5px 3px}
+ body.challenge-mode #board{height:56dvh;width:min(39vw,calc(56dvh * .43))}
+ body.challenge-mode footer{gap:3px;padding-top:2px}
+}
+@media(max-height:600px){header{padding:3px 0}.subtitle{display:none}#challengeTracker{padding:3px 6px;margin:0 auto 2px}.tracker-title{margin-bottom:2px}#board{height:58dvh;width:min(38vw,calc(58dvh * .43))}.gauge-shell{height:105px}.side{gap:4px}.panel{padding:4px 3px}footer{gap:3px;padding-top:2px}button{padding:6px 8px}}
+#privacyOverlay{position:fixed;inset:0;z-index:80;background:#070b14ee;display:none;align-items:center;justify-content:center;padding:12px}
+#privacyOverlay.visible{display:flex}
+#privacyModal{width:min(680px,100%);max-height:calc(100dvh - 24px);overflow-y:auto;text-align:left;border:1px solid #4a5d7b;border-radius:16px;background:linear-gradient(160deg,#202e49,#151e30);padding:clamp(16px,4vw,26px);box-shadow:0 18px 60px #000b}
+#privacyModal h2{margin:0 0 16px;text-align:center;color:var(--cyan);font-size:21px}
+#privacyModal h3{font-size:14px;color:#ffdc85;margin:18px 0 7px}
+#privacyModal p{font-size:12px;line-height:1.85;color:#c0cce0;margin:7px 0}
+#privacyModal a{color:#80eaff;overflow-wrap:anywhere}
+#privacyClose{display:block;margin:18px auto 0;padding:9px 24px;background:#28344b;border-color:#7385a5}
+</style>
+</head>
+<body>
+<header>
+<h1>Make 10tris</h1>
+<div class="subtitle" id="subtitle">CONNECT · CLEAR · CHAIN · EXPLODE</div>
+</header>
+<div id="challengeTracker"><div class="tracker-title">CHALLENGE BINGO · MAKE ALL 9</div><div class="tracker-items" id="challengeTrackerItems"></div></div>
+<main>
+<aside class="side">
+<div class="panel" id="timerPanel" style="display:none"><div class="panel-title">TIME</div><div id="timerValue">03:00</div></div>
+<div class="panel"><div class="panel-title">SCORE</div><div class="score" id="score">0</div></div>
+<div class="panel"><div class="panel-title">BEST</div><div class="score" id="best" style="font-size:17px">0</div></div>
+<div class="panel"><div class="panel-title">HOLD</div><div id="holdDisplay" class="score">—</div><button id="holdBtn">HOLD</button></div>
+<div class="panel" id="powerPanel">
+<div class="panel-title">POWER</div>
+<div class="gauge-shell" id="gaugeShell"><div id="gaugeFill"></div></div>
+<div id="chargeText">0%</div><div id="readyText">CHARGING...</div>
+</div>
+</aside>
+<div id="board"><div id="explosionFX"></div><div id="combo"></div><div id="judgement"></div></div>
+<aside class="side">
+<div class="panel"><div class="panel-title">NEXT</div><div id="nextDisplay" style="display:flex;flex-direction:column;gap:5px"></div></div>
+<div class="panel"><div class="panel-title">MAX COMBO</div><div id="chainDisplay" class="score">0</div></div>
+<div class="panel"><div class="panel-title">RANKING</div><ol id="rankList" style="padding-left:20px;margin:0;font-size:11px"></ol></div>
+</aside>
+</main>
+<footer>
+<div id="message">合計10を作って連鎖を狙おう！</div>
+<div class="controls">
+<button id="leftBtn">◀</button><button id="downBtn">▼</button><button id="rightBtn">▶</button><button id="hardDropBtn">一番下まで</button><button id="blastBtn" disabled>✦ 爆発 [ENTER]</button>
+</div>
+</footer>
+<div id="bingoFX"><div class="bingo-label">BINGO!!</div></div>
+<div id="overlay"><div class="modal">
+<h2 id="overlayTitle">Make 10tris</h2>
+<p id="overlayText">プレイするモードを選んでね。<br>スペースキーで一気に落下。</p>
+<div id="introDescription">
+ <h3>ゲームの遊び方</h3>
+ <p>落ちてくる数字ブロックを左右に動かし、縦または横の合計が<strong>10</strong>になる列を作ろう。</p>
+ <p>ブロックを消すとスコア獲得。連続して消すと<strong>CHAIN BONUS</strong>で得点アップ！</p>
+ <p><strong>HOLD</strong>でブロックを一時保管し、<strong>NEXT</strong>で次に落ちてくる数字を確認できるよ。</p>
+ <p>モードを選んで、ランキング上位を目指そう！</p>
+</div>
+<div id="modeDescription"><h3 id="modeDescriptionTitle"></h3><ul id="modeDescriptionList"></ul><div class="detail-actions"><button id="detailBackBtn" type="button">戻る</button><button id="detailStartBtn" type="button">スタート</button></div></div>
+<div id="resultRanking"><h3>WORLD RANKING</h3><ol id="resultRankList"></ol><div id="currentRunRecord">今回の記録：集計中...</div><div id="rankingStatus"></div></div>
+<div id="playerNameSetup"><label for="playerNameInput">プレイヤー名（最初に一度だけ登録）</label><input id="playerNameInput" maxlength="12" placeholder="名前を入力" autocomplete="nickname"><button id="playerNameSave">名前を登録する</button><div id="playerNameStatus"></div></div>
+<div class="mode-buttons" id="modeButtons"><button id="normalModeBtn">NORMAL</button><button id="challengeModeBtn">CHALLENGE</button><button id="speedModeBtn">SPEED</button><button id="superModeBtn">SUPER SPEED</button></div>
+<button id="overlayBtn" style="display:none">もう一度プレイ</button><button id="modeSelectBtn">モード選択へ</button>
+</div></div>
+<button id="privacyLink" type="button">🔒 プライバシーポリシー</button>
+<div id="privacyOverlay" aria-hidden="true">
+ <section id="privacyModal" role="dialog" aria-modal="true" aria-labelledby="privacyTitle">
+  <h2 id="privacyTitle">🔒 プライバシーポリシー</h2>
+  <h3>法令、規範の遵守と見直し</h3>
+  <p>当サイトは、保有する個人情報に関して適用される日本の法令、その他規範を遵守するとともに、本ポリシーの内容を適宜見直し、その改善に努めます。</p>
+  <h3>第三者配信広告について</h3>
+  <p>当サイトでは、第三者配信事業者であるGoogleが提供する広告サービス「Google AdSense」を利用する予定です。</p>
+  <p>Googleなどの第三者配信事業者は、Cookieを使用して、ユーザーが当サイトや他のウェブサイトに過去にアクセスした際の情報に基づいて広告を配信する場合があります。</p>
+  <p>Googleによる広告Cookieの使用については、以下をご確認ください。</p>
+  <p><a href="https://policies.google.com/technologies/ads?hl=ja" target="_blank" rel="noopener noreferrer">Googleの広告に関するポリシー</a></p>
+  <p>また、第三者配信事業者によるパーソナライズ広告に使用されるCookieについては、以下から設定を確認・変更できます。</p>
+  <p><a href="https://www.aboutads.info/" target="_blank" rel="noopener noreferrer">AboutAds.info</a></p>
+  <p>Cookieの利用を望まない場合は、ご自身が使用しているブラウザの設定からCookieを無効化または削除することができます。各ブラウザでの設定方法については、以下をご参照ください。</p>
+  <p><a href="https://support.google.com/chrome/answer/95647?hl=ja" target="_blank" rel="noopener noreferrer">Google Chrome：ChromeでCookieを削除、許可、管理する</a></p>
+  <p><a href="https://support.apple.com/ja-jp/guide/safari/sfri11471/mac" target="_blank" rel="noopener noreferrer">Safari：MacのSafariでCookieを消去する</a></p>
+  <p><a href="https://support.mozilla.org/ja/kb/clear-cookies-and-site-data-firefox" target="_blank" rel="noopener noreferrer">Firefox：Cookieの情報やウェブサイトのデータを削除する</a></p>
+  <p>また、Googleによるパーソナライズ広告の設定については、以下から確認・変更できます。</p>
+  <p><a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer">Google広告設定</a></p>
+  <h3>当サイトが使用しているアクセス解析ツールについて</h3>
+  <p>当サイトでは、Googleによるアクセス解析ツール「Googleアナリティクス」を利用しています。</p>
+  <p>このGoogleアナリティクスはトラフィックデータの収集のためにCookieを使用しています。このトラフィックデータは匿名で収集されており、個人を特定するものではありません。</p>
+  <h3>お問い合わせについて</h3>
+  <p>当サイトでは、お問い合わせいただく際に、メールアドレス等の個人情報をご入力いただいております。</p>
+  <p>取得した個人情報は、お問い合わせに対する回答や必要な情報を電子メールなどでご連絡する場合に利用させていただくものであり、この目的以外では利用いたしません。</p>
+  <p>なお、お問い合わせの際は、以下のメールアドレスまでご連絡ください。</p>
+  <p>お問い合わせメールアドレス：<a href="mailto:toshika10101@gmail.com">toshika10101@gmail.com</a></p>
+  <h3>免責事項</h3>
+  <p>当サイトを利用した、何らかのトラブルや損害、損失等につきましては、当サイトでは、一切の責任を負いかねます事ご了承願います。</p>
+  <h3>リンクについて</h3>
+  <p>当サイトは、基本的にリンクフリーです。リンクを張る際の許可などは不要です。</p>
+  <button id="privacyClose" type="button">閉じる</button>
+ </section>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const W=4,H=10,$=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const boardEl=$("board"),cells=[],board=Array.from({length:H},()=>Array(W).fill(0));
+let piece=null,hold=null,holdUsed=false,queue=[],score=0,best=0;
+let selectedMode="normal";
+let playerName="";
+let currentRunRank=null;
+let rankingCache={normal:[],speed:[],super:[],challenge:[]};
+let rankingLoadError=false;
+let rankingSaveInProgress=false;
+const RANKING_API="https://make-tentris.com/ranking.php";
+let currentRecordId=null;
+let running=false,gameOver=false,resolving=false;
+let challengeTimeLeft=180000;
+const challengeCompletedTargets=new Set();
+const CHALLENGE_BINGO_BONUS=1000000;
+let lockTimer=0,groundedTimer=0,groundedY=-1,lastTime=0,fallTimer=0,fallInterval=750,charge=0,maxCombo=0;
+let messageTimer=null,blastCells=new Set(),clearCells=new Set(),audioCtx=null;
+const CHARGE_MAX=100,LOCK_DELAY=600,MAX_GROUNDED_TIME=3000,TIME_CHARGE_PER_SECOND=.02;
+const CLEAR_ANIMATION=280,FALL_ANIMATION=230;
+
+for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+ const el=document.createElement("div");el.className="cell";el.dataset.x=x;el.dataset.y=y;
+ boardEl.appendChild(el);cells.push(el);
+}
+const activeEl=document.createElement("div");activeEl.className="active";activeEl.style.display="none";boardEl.appendChild(activeEl);
+
+// モード別の出現確率
+function randomNumber(){
+ const values=[1,2,3,4,5,6,7,8,9];
+ const weights=selectedMode==="challenge"?[1,3,6,10,12,17,17,17,17]:[6,10,13,14,14,14,13,10,6];
+ let r=Math.random()*weights.reduce((a,b)=>a+b,0);
+ for(let i=0;i<values.length;i++){r-=weights[i];if(r<0)return values[i]}
+ return 1;
+}
+function ensureQueue(){while(queue.length<3)queue.push(randomNumber())}
+function spawnPiece(){
+ ensureQueue();piece={x:1,y:0,value:queue.shift()};ensureQueue();
+ holdUsed=false;lockTimer=0;groundedTimer=0;groundedY=-1;fallTimer=0;
+ if(board[0][piece.x]!==0){
+  const x=[0,1,2,3].find(x=>board[0][x]===0);
+  if(x!==undefined)piece.x=x;else{endGame();return}
+ }
+ render();
+}
+function render(){
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+  const el=cells[y*W+x],v=board[y][x],key=`${x},${y}`;
+  el.className="cell";el.textContent=v||"";
+  if(v)el.classList.add("n"+v);
+  if(clearCells.has(key)){el.classList.add("clearing");if(selectedMode!=="challenge")el.classList.add("soft-clear");}
+  if(blastCells.has(key))el.classList.add("blast");
+ }
+ if(piece&&!gameOver){
+  activeEl.style.display="flex";activeEl.style.left=`${piece.x*25}%`;
+  activeEl.style.top=`${piece.y*10}%`;activeEl.style.width="25%";
+  activeEl.style.height="10%";activeEl.className="active n"+piece.value;
+  activeEl.textContent=piece.value;
+ }else activeEl.style.display="none";
+ $("score").textContent=score.toLocaleString();$("best").textContent=best.toLocaleString();
+ $("holdDisplay").textContent=hold??"—";
+ $("holdBtn").disabled=!running||resolving||holdUsed||!piece;
+ $("nextDisplay").innerHTML=queue.slice(0,3).map(v=>`<div class="score" style="font-size:19px">${v}</div>`).join("");
+ updateGauge();renderRanking();
 }
 function updateGauge(){
  const pct=Math.min(100,charge),ready=charge>=CHARGE_MAX;
@@ -316,7 +559,7 @@ function explosionShape(cx,cy){
 }
 async function explode(){
  if(!running||resolving||!piece||charge<CHARGE_MAX)return;
-  resolving=true;charge=0;updateGauge();
+ resolving=true;charge=0;updateGauge();
  const cx=piece.x,cy=piece.y,targets=explosionShape(cx,cy);
  const fx=$("explosionFX"),px=(cx+.5)/W*100,py=(cy+.5)/H*100;
  blastCells=new Set(targets.map(([x,y])=>`${x},${y}`));
@@ -328,56 +571,7 @@ async function explode(){
  }
  const particleColors=["#fffbd0","#ffe36e","#ff9d35","#ff5b2e","#b8f7ff"];
  for(let i=0;i<30;i++){
-  const angle=Math.PI*2*i/30+(Math.random()-.5)*.16,dist=65+Math.random()*155;
-  const p=document.createElement("div");p.className="blast-particle";
-  p.style.setProperty("--x",px+"%");p.style.setProperty("--y",py+"%");
-  p.style.setProperty("--dx",Math.cos(angle)*dist+"px");p.style.setProperty("--dy",Math.sin(angle)*dist+"px");
-  p.style.setProperty("--size",(3+Math.random()*7)+"px");
-  p.style.setProperty("--color",particleColors[i%particleColors.length]);fx.appendChild(p);
- }
- if(piece){
-  activeEl.classList.add("blast-center");
-  activeEl.style.left=`${cx*25}%`;activeEl.style.top=`${cy*10}%`;
- }
- playExplosionSound();boardEl.classList.remove("shake");void boardEl.offsetWidth;boardEl.classList.add("shake");
- render();
- await sleep(620);
- for(const [x,y] of targets)board[y][x]=0;
- piece=null;blastCells.clear();fx.innerHTML="";activeEl.classList.remove("blast-center");
- compactBoard();render();
- await sleep(180);
- resolving=false;
- if(!running||gameOver)return;
- if(board[0].some(v=>v!==0)){endGame();return}
- spawnPiece();
-}
-function getFallInterval(){
- if(selectedMode==="super")return Math.max(35,100-Math.floor(score/180));
- if(selectedMode==="speed")return Math.max(45,200-Math.floor(score/150));
- return Math.max(90,750-Math.floor(score/35));
-}
-function updateGame(timestamp){
- if(!running)return;
- const dt=Math.min(50,timestamp-lastTime||16);lastTime=timestamp;
- if(selectedMode==="challenge"){
-  challengeTimeLeft-=dt;updateChallengeTimer();
-  if(challengeTimeLeft<=0){challengeTimeLeft=0;updateChallengeTimer();endGame("timeup");return}
- }
- if(piece&&!resolving){
-  fallInterval=getFallInterval();fallTimer+=dt;
-  if(fallTimer>=fallInterval){
-   fallTimer=0;
-   if(canMove(piece.x,piece.y+1)){piece.y++;groundedTimer=0;groundedY=-1;lockTimer=0;render()}
-  }
-  if(!canMove(piece.x,piece.y+1)){
-   if(groundedY!==piece.y){groundedY=piece.y;groundedTimer=0}
-   groundedTimer+=dt;lockTimer+=dt;
-   if(lockTimer>=LOCK_DELAY||groundedTimer>=MAX_GROUNDED_TIME)lockPiece();
-  }else{groundedY=-1;groundedTimer=0;lockTimer=0}
- }
- requestAnimationFrame(updateGame);
-}
-)*.16;
+  const angle=Math.PI*2*i/30+(Math.random()-.5)*.16;
   const distance=55+Math.random()*115;
   const particle=document.createElement("div");particle.className="blast-particle";
   particle.style.setProperty("--x",px+"%");particle.style.setProperty("--y",py+"%");
@@ -407,7 +601,6 @@ function startGame(mode=selectedMode){
  selectedMode=mode;
  document.body.classList.toggle("challenge-mode",selectedMode==="challenge");
  $("subtitle").textContent=selectedMode==="challenge"?"CHALLENGE · SUM 10–90 · 3 MIN TIME ATTACK":selectedMode==="super"?"SUPER SPEED · 100MS START · KEEP ACCELERATING":selectedMode==="speed"?"SPEED · FAST START · KEEP ACCELERATING":"NORMAL · SUM 10 · CONNECT · CLEAR · CHAIN";
- renderRanking();
  fetchRanking(selectedMode);
  $("overlay").classList.add("hidden");$("modeButtons").style.display="none";$("modeDescription").style.display="none";$("introDescription").style.display="none";$("overlayBtn").style.display="none";$("modeSelectBtn").style.display="none";$("resultRanking").classList.remove("visible");
  init();running=true;gameOver=false;
@@ -421,29 +614,15 @@ function init(){
  clearCells.clear();blastCells.clear();challengeCompletedTargets.clear();renderChallengeTracker();gameOver=false;$("chainDisplay").textContent="0";render();
 }
 async function endGame(reason="gameover"){
- if(gameOver)return;
- running=false;gameOver=true;piece=null;best=Math.max(best,score);currentRunRank=null;render();
+ running=false;gameOver=true;piece=null;best=Math.max(best,score);render();currentRunRank=null;
  $("overlayTitle").textContent=reason==="timeup"?"TIME UP!":"GAME OVER";
  $("overlayText").innerHTML=`${selectedMode==="challenge"?"CHALLENGE":selectedMode==="super"?"SUPER SPEED":selectedMode==="speed"?"SPEED":"NORMAL"}<br>SCORE: <b>${score.toLocaleString()}</b><br>最高コンボ: <b>${maxCombo}</b>${reason==="timeup"?"<br>3分間お疲れさま！":""}`;
- $("resultRanking").classList.add("visible");
- $("resultRankList").innerHTML='<li style="list-style:none">ランキングを更新中...</li>';
- $("currentRunRecord").textContent=`今回の記録：${score.toLocaleString()}点`;
- $("rankingStatus").textContent="";
+ $("resultRanking").classList.add("visible");$("currentRunRecord").textContent="今回の記録：ランキングを更新中...";
  $("modeButtons").style.display="none";$("overlayBtn").style.display="inline-block";$("overlayBtn").textContent="このモードでもう一度";
  $("modeSelectBtn").style.display="inline-block";$("modeSelectBtn").textContent="別モードを選ぶ";$("overlay").classList.remove("hidden");
- if(rankingSaveInProgress)return;
- rankingSaveInProgress=true;
- try{
-  await saveRanking(score,selectedMode);
-  renderResultRanking();
- }catch(error){
-  console.error("Ranking save error:",error);
-  await fetchRanking(selectedMode);
-  $("rankingStatus").textContent="記録を保存できませんでした。ranking.phpの設置を確認してください。";
-  renderResultRanking();
- }finally{
-  rankingSaveInProgress=false;
- }
+ await saveRanking(score,selectedMode);
+ await fetchRanking(selectedMode);
+ renderResultRanking();
 }
 function loop(now){
  if(!running||gameOver)return;
@@ -521,12 +700,7 @@ function ensurePlayerName(){
 function normalizeRankingRecords(records){
  if(!Array.isArray(records))return [];
  return records.filter(r=>r&&typeof r==="object"&&Number.isFinite(Number(r.score))).map((r,i)=>({
-  id:String(r.id||`${i}`),
-  name:String(r.name||"PLAYER").slice(0,12),
-  score:Number(r.score),
-  mode:String(r.mode||"normal"),
-  rank:Number(r.rank||i+1),
-  date:String(r.date||"")
+  id:String(r.id||`${Date.now()}-${i}`),name:String(r.name||"PLAYER").slice(0,12),score:Number(r.score),mode:String(r.mode||"normal"),date:String(r.date||"")
  }));
 }
 async function fetchRanking(mode=selectedMode){
@@ -534,55 +708,46 @@ async function fetchRanking(mode=selectedMode){
   const response=await fetch(`${RANKING_API}?mode=${encodeURIComponent(mode)}&t=${Date.now()}`,{cache:"no-store"});
   if(!response.ok)throw new Error(`HTTP ${response.status}`);
   const data=await response.json();
-  if(!data.ok)throw new Error(data.error||"ランキング取得失敗");
-  rankingCache[mode]=normalizeRankingRecords(data.rankings);
+  if(!data.ok||!Array.isArray(data.records))throw new Error("Invalid ranking response");
+  rankingCache[mode]=normalizeRankingRecords(data.records);
   rankingLoadError=false;
  }catch(error){
-  rankingLoadError=true;
-  console.error("Ranking fetch error:",error);
+  console.error("Ranking fetch failed:",error);rankingLoadError=true;
  }
- renderRanking();
- if(gameOver)renderResultRanking();
+ if(mode===selectedMode)renderRanking();
+ if($("resultRanking").classList.contains("visible")&&mode===selectedMode)renderResultRanking();
  return rankingCache[mode]||[];
 }
 async function saveRanking(newScore,mode){
- const response=await fetch(`${RANKING_API}?mode=${encodeURIComponent(mode)}`,{
-  method:"POST",
-  headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({name:playerName,score:newScore,mode})
- });
- if(!response.ok)throw new Error(`HTTP ${response.status}`);
- const data=await response.json();
- if(!data.ok)throw new Error(data.error||"ランキング保存失敗");
- rankingCache[mode]=normalizeRankingRecords(data.rankings);
- currentRunRank=Number(data.currentRank)||null;
- rankingLoadError=false;
- renderRanking();
- return data;
+ if(!playerName||!Number.isFinite(Number(newScore)))return null;
+ rankingSaveInProgress=true;
+ try{
+  const response=await fetch(RANKING_API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:playerName,score:Number(newScore),mode})});
+  if(!response.ok)throw new Error(`HTTP ${response.status}`);
+  const data=await response.json();
+  if(!data.ok)throw new Error(data.error||"Save failed");
+  rankingCache[mode]=normalizeRankingRecords(data.records||[]);
+  currentRunRank=Number.isInteger(data.rank)?data.rank:null;
+  rankingLoadError=false;
+  return data.record||null;
+ }catch(error){
+  console.error("Ranking save failed:",error);rankingLoadError=true;return null;
+ }finally{rankingSaveInProgress=false;}
 }
 function renderRanking(){
  const list=$("rankList");if(!list)return;
  const records=(rankingCache[selectedMode]||[]).slice(0,5);
- list.innerHTML=records.map(r=>`<li><span class="ranking-name">${escapeHTML(r.name)}</span><span class="ranking-score">${r.score.toLocaleString()}</span></li>`).join("");
- if(!records.length)list.innerHTML='<li style="color:#9eabc5">まだ記録なし</li>';
- const mine=(rankingCache[selectedMode]||[]).filter(r=>r.name.toLocaleLowerCase()===playerName.toLocaleLowerCase());
+ list.innerHTML=records.map((r,i)=>`<li><span class="ranking-name">${escapeHTML(r.name)}</span><span class="ranking-score">${r.score.toLocaleString()}</span></li>`).join("");
+ const mine=(rankingCache[selectedMode]||[]).filter(r=>r.name===playerName);
  best=mine.length?Math.max(...mine.map(r=>r.score)):0;
  $("best").textContent=best.toLocaleString();
 }
 function renderResultRanking(){
  const list=$("resultRankList");if(!list)return;
  const records=rankingCache[selectedMode]||[];
- list.innerHTML=records.map(r=>{
-  const rank=Number(r.rank)||0;
-  const rankClass=rank===1?"rank-gold":rank===2?"rank-silver":rank===3?"rank-bronze":"";
-  const isMe=r.name.toLocaleLowerCase()===playerName.toLocaleLowerCase();
-  return `<li class="${rankClass}${isMe?" current-score":""}"><span>${rank}位　${escapeHTML(r.name)}</span><span class="ranking-score">${r.score.toLocaleString()}</span></li>`;
- }).join("");
- if(!records.length)list.innerHTML='<li style="list-style:none;color:#9eabc5">まだ記録がありません</li>';
- $("currentRunRecord").textContent=currentRunRank
-  ?`今回の記録：${score.toLocaleString()}点 ／ 自己ベスト順位：${currentRunRank}位`
-  :`今回の記録：${score.toLocaleString()}点`;
- $("rankingStatus").textContent=rankingLoadError?"ランキングを取得できませんでした。通信環境を確認してください。":"";
+ list.innerHTML=records.map((r,i)=>`<li class="${i===0?"rank-gold":i===1?"rank-silver":i===2?"rank-bronze":""} ${r.name===playerName&&r.score===best?"current-score":""}"><span class="rank-number">${i+1}位</span><span class="ranking-name">${escapeHTML(r.name)}</span><span class="ranking-score">${r.score.toLocaleString()}</span></li>`).join("");
+ $("currentRunRecord").textContent=`今回の記録：${score.toLocaleString()}点 ／ 自己ベスト順位：${currentRunRank?currentRunRank+"位":"圏外または未取得"}`;
+ $("rankingStatus").textContent=rankingLoadError?"ランキングサーバーに接続できませんでした。":"全世界共通ランキング・各モード別";
 }
 function escapeHTML(value){
  return String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
