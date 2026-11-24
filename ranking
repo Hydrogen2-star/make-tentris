@@ -1,0 +1,253 @@
+<?php
+declare(strict_types=1);
+
+header('Content-Type: application/json; charset=UTF-8');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+
+const ALLOWED_MODES = ['normal', 'speed', 'super', 'challenge'];
+const MAX_SCORE = 1000000000;
+
+function respond(array $data, int $status = 200): void {
+    http_response_code($status);
+    echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
+function clean_name($value): string {
+    if (!is_string($value)) return '';
+    $name = trim(strip_tags($value));
+    $name = preg_replace('/[\x00-\x1F\x7F]/u', '', $name);
+    if ($name === null) return '';
+
+    if (function_exists('mb_substr')) {
+        $name = mb_substr($name, 0, 12, 'UTF-8');
+    } else {
+        preg_match_all('/./us', $name, $characters);
+        $name = implode('', array_slice($characters[0] ?? [], 0, 12));
+    }
+
+    return trim($name);
+}
+
+function name_key(string $name): string {
+    return function_exists('mb_strtolower')
+        ? mb_strtolower($name, 'UTF-8')
+        : strtolower($name);
+}
+
+function data_paths(): array {
+    $dir = __DIR__ . DIRECTORY_SEPARATOR . 'ranking-data';
+
+    if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
+        respond(['ok' => false, 'error' => '保存フォルダを作成できません。'], 500);
+    }
+
+    if (!file_exists($dir . '/.htaccess')) {
+        @file_put_contents($dir . '/.htaccess', "Require all denied\n");
+    }
+
+    if (!file_exists($dir . '/index.html')) {
+        @file_put_contents($dir . '/index.html', '');
+    }
+
+    return [
+        'data' => $dir . '/scores.json',
+        'lock' => $dir . '/scores.lock'
+    ];
+}
+
+function read_records(string $file): array {
+    if (!file_exists($file)) return [];
+
+    $raw = file_get_contents($file);
+    if ($raw === false || $raw === '') return [];
+
+    $data = json_decode($raw, true);
+    return is_array($data) ? $data : [];
+}
+
+function sort_records(array &$records): void {
+    usort($records, function ($a, $b) {
+        $result = ((int)$b['score']) <=> ((int)$a['score']);
+
+        if ($result !== 0) return $result;
+
+        return strcmp(
+            (string)($a['date'] ?? ''),
+            (string)($b['date'] ?? '')
+        );
+    });
+}
+
+function ranked_records(array $records): array {
+    sort_records($records);
+
+    $result = [];
+    $rank = 0;
+    $previousScore = null;
+
+    foreach ($records as $index => $record) {
+        $score = (int)($record['score'] ?? 0);
+
+        if ($previousScore === null || $score !== $previousScore) {
+            $rank = $index + 1;
+        }
+
+        $previousScore = $score;
+        $record['rank'] = $rank;
+        $result[] = $record;
+    }
+
+    return $result;
+}
+
+$mode = isset($_GET['mode']) ? (string)$_GET['mode'] : 'normal';
+
+if (!in_array($mode, ALLOWED_MODES, true)) {
+    respond(['ok' => false, 'error' => '不正なモードです。'], 400);
+}
+
+$paths = data_paths();
+$lock = fopen($paths['lock'], 'c');
+
+if ($lock === false) {
+    respond(['ok' => false, 'error' => 'ランキングをロックできません。'], 500);
+}
+
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+if ($method === 'GET') {
+    if (!flock($lock, LOCK_SH)) {
+        fclose($lock);
+        respond(['ok' => false, 'error' => '読み込みに失敗しました。'], 500);
+    }
+
+    $all = read_records($paths['data']);
+
+    flock($lock, LOCK_UN);
+    fclose($lock);
+
+    $records = array_values(array_filter($all, function ($record) use ($mode) {
+        return is_array($record) && ($record['mode'] ?? '') === $mode;
+    }));
+
+    respond([
+        'ok' => true,
+        'mode' => $mode,
+        'rankings' => ranked_records($records)
+    ]);
+}
+
+if ($method === 'POST') {
+    $input = json_decode(file_get_contents('php://input') ?: '', true);
+
+    if (!is_array($input)) {
+        fclose($lock);
+        respond(['ok' => false, 'error' => '送信データが正しくありません。'], 400);
+    }
+
+    $name = clean_name($input['name'] ?? '');
+    $scoreValue = $input['score'] ?? null;
+
+    if (
+        $name === '' ||
+        !is_numeric($scoreValue) ||
+        (string)(int)$scoreValue !== (string)$scoreValue
+    ) {
+        fclose($lock);
+        respond(['ok' => false, 'error' => '名前またはスコアが正しくありません。'], 400);
+    }
+
+    $score = (int)$scoreValue;
+
+    if ($score < 0 || $score > MAX_SCORE) {
+        fclose($lock);
+        respond(['ok' => false, 'error' => 'スコアが範囲外です。'], 400);
+    }
+
+    if (!flock($lock, LOCK_EX)) {
+        fclose($lock);
+        respond(['ok' => false, 'error' => '更新に失敗しました。'], 500);
+    }
+
+    $all = read_records($paths['data']);
+    $key = name_key($name);
+    $found = false;
+    $personalBest = $score;
+
+    foreach ($all as &$record) {
+        if (
+            ($record['mode'] ?? '') === $mode &&
+            name_key((string)($record['name'] ?? '')) === $key
+        ) {
+            $found = true;
+            $oldScore = (int)($record['score'] ?? 0);
+            $personalBest = max($oldScore, $score);
+
+            if ($score > $oldScore) {
+                $record['score'] = $score;
+                $record['date'] = gmdate('c');
+                $record['name'] = $name;
+            }
+
+            break;
+        }
+    }
+
+    unset($record);
+
+    if (!$found) {
+        $all[] = [
+            'id' => bin2hex(random_bytes(8)),
+            'name' => $name,
+            'score' => $score,
+            'mode' => $mode,
+            'date' => gmdate('c')
+        ];
+    }
+
+    $encoded = json_encode(
+        $all,
+        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+    );
+
+    if (
+        $encoded === false ||
+        file_put_contents($paths['data'], $encoded, LOCK_EX) === false
+    ) {
+        flock($lock, LOCK_UN);
+        fclose($lock);
+        respond(['ok' => false, 'error' => '保存できませんでした。'], 500);
+    }
+
+    flock($lock, LOCK_UN);
+    fclose($lock);
+
+    $modeRecords = array_values(array_filter($all, function ($record) use ($mode) {
+        return is_array($record) && ($record['mode'] ?? '') === $mode;
+    }));
+
+    $ranked = ranked_records($modeRecords);
+    $currentRank = null;
+
+    foreach ($ranked as $record) {
+        if (name_key((string)$record['name']) === $key) {
+            $currentRank = (int)$record['rank'];
+            break;
+        }
+    }
+
+    respond([
+        'ok' => true,
+        'mode' => $mode,
+        'rankings' => $ranked,
+        'currentRank' => $currentRank,
+        'personalBest' => $personalBest
+    ]);
+}
+
+flock($lock, LOCK_UN);
+fclose($lock);
+
+header('Allow: GET, POST');
+respond(['ok' => false, 'error' => '許可されていないメソッドです。'], 405);
